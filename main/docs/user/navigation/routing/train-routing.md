@@ -14,17 +14,20 @@ import InfoIncompleteArticle from '@site/src/components/_infoIncompleteArticle.m
 import InfoAndroidOnly from '@site/src/components/_infoAndroidOnly.mdx';
 
 
-## Overview
+> *This article was last updated in June 2024*
 
-*Train routing* in OsmAnd provides users with possibility to use railroad lines for navigation as if they were driving a train like a car. This option can be useful, for example, for hiking when no other roads are available. In other cases it's better to use *[Public transport routing](./public-transport-navigation.md)*.  
+## Overview
 
 :::note
 By default, *Train profile* is deactivated. In order to use this profile for routing, you need to switch it on in *<Translate android="true" ids="shared_string_menu,shared_string_settings,application_profiles"/>*.
 :::
 
-## Route parameters - Train
+*Train routing* in OsmAnd provides users with possibility to use railroad lines for navigation as if they were driving a train like a car. This option can be useful, for example, for hiking when no other roads are available. In other cases it's better to use *[Public transport routing](./public-transport-navigation.md)*.  
 
-*Train routing* can be configured according to your needs in the [Route parameters section](../guidance/navigation-settings.md#navigation-type--route-parameters) of the Navigation settings.  
+![Map transport tram](@site/static/img/navigation/routing/train_routing_overview.png)
+
+
+## Route parameters - Train
 
 <Tabs groupId="operating-systems">
 
@@ -42,8 +45,17 @@ By default, *Train profile* is deactivated. In order to use this profile for rou
 
 </Tabs>
 
-Routing settings:  
-- The routing algorithm can take into account temporary limitations specified in OpenStreetMap. This can be done by using *[<Translate android="true" ids="temporary_conditional_routing"/>](../routing/osmand-routing.md#consider-temporary-limitations)* option. Note that in some cases, the information from OSM may be outdated. 
-- In the [Recalculate route section](../setup/route-navigation.md#route-recalculation) of the Route parameters, you can enable and adjust route recalculation options.
-- *[<Translate android="true" ids="default_speed_setting_title"/>](../guidance/navigation-settings.md#default-speed)* (Android) or *[<Translate ios="true" ids="road_speeds"/>](../guidance/navigation-settings.md#default-speed)* (iOS) should be set according to your vehicle parameters. It is used to calculate Estimated Time of Arrival.
-- In the [Development section](../routing/index.md#development-settings) of the Route parameters (**Android only**), you can try new routing features, that are under testing now. Note, that these settings are only available when the [OsmAnd development plugin](../../plugins/development.md) is enabled.
+*Train routing* can be configured according to your needs in the [Route parameters section](../guidance/navigation-settings.md#route-parameters) of the Navigation settings.  
+
+
+## Other routing settings
+
+- The routing algorithm can also take into account temporary limitations specified in OpenStreetMap. This can be done by using *[<Translate android="true" ids="temporary_conditional_routing"/>](../routing/osmand-routing.md#consider-temporary-limitations)* option. Note that in some cases, information from OSM can be outdated.  
+
+- In the [*Recalculate route section*](../../navigation/guidance/navigation-settings.md#recalculate-route) of the *Route parameters*, you can enable and adjust route recalculation options.
+
+- In the [*Development section*](../guidance/navigation-settings.md#development-settings) of the *Route parameters*, you can try new routing features that are currently in the testing phase. Note, that these settings are only available when the [OsmAnd development plugin](../../plugins/development.md) is enabled.
+
+- *[<Translate ios="true" ids="road_speeds"/>](../guidance/navigation-settings.md#road-speeds)* setting in the *iOS* version of OsmAnd is located in *Navigation settings → Route parameters* (for *Android*, in *Vehicle parameters → [<Translate android="true" ids="default_speed_setting_title"/>](../guidance/navigation-settings.md#default-speed--road-speeds)*). These settings can also be set for *Direct-to-point* routing. It is used to calculate Estimated Time of Arrival. 
+
+- *[<Translate ios="true" ids="vehicle_parameters"/>](../guidance/navigation-settings.md#vehicle-parameters)*. Properly configuring the settings will help you avoid problems when creating a route. You can select the most appropriate route depending on the type of vehicle and road restrictions, as well as calculate the travel time.

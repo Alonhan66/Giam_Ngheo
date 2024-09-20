@@ -1,6 +1,6 @@
 ---
-sidebar_position: 5
-title:  Nautical map view
+sidebar_position: 7
+title:  Nautical Map View
 ---
 
 import Tabs from '@theme/Tabs';
@@ -13,14 +13,14 @@ import Translate from '@site/src/components/Translate.js';
 import ProFeature from '@site/src/components/buttons/ProFeature.mdx';
 import InfoIncompleteArticle from '@site/src/components/_infoIncompleteArticle.mdx';
 
+
+## Overview
+
 :::tip NOTE
 The Nautical map view plugin is a paid feature of the OsmAnd app.  
 :::
 
 Nautical map view is a detailed graphic representation of oceans, seas, coastal areas, and rivers that helps you navigate the water and know popular routes, obstacles in your waterway, nearest harbors, anchorages, and other important landmarks.  
-
-
-## Overview
 
 Nautical Chart is a highly detailed topographical map to help skippers navigate a vessel on a selected course on the water. It is similar to a road map for those traveling by car. Often colled a *'Chart'* for historical reasons, it is a detailed graphic representation of the oceans, seas, coastal areas and rivers.  
 
@@ -91,7 +91,7 @@ To change the current map style to Nautical, you need to make the following sett
 
 ### Download Nautical maps  
 
-For optimal presentation, maps can be adapted to current needs: marks and symbols can be added with depth points and, if necessary, contours. On the other hand, standard maps with information about inland, onshore and nearshore waters information for a particular region can be a good complement to the information about waterways on a Nautical map.  
+For optimal presentation, maps can be adapted to current needs: marks and symbols can be added with depth points and, as needed, contours. On the other hand, standard maps with information about inland, onshore and nearshore waters information for a particular region can be a good complement to the information about waterways on a Nautical map.  
 
 When you [download](../start-with/download-maps.md) a nautical map, more details related to Boat navigation appear on the map. Some types of [Nautical maps](../start-with/download-maps.md#type-of-maps) contain details such as:  
 
@@ -112,7 +112,7 @@ All depth numbers on the Nautical Charts are indicated in meters.
 
 <TabItem value="android" label="Android">  
 
-*<Translate android="true" ids="shared_string_menu,welmode_download_maps,nautical_maps"/>*  
+*<Translate android="true" ids="shared_string_menu,maps_and_resources,nautical_maps"/>*  
 
 ![Nautical plugin maps view Android](@site/static/img/plugins/nautical-charts/plugin_nautical_view_android.png)
 
@@ -256,3 +256,11 @@ For more details on the classification of the surface details and the rendering 
 </TabItem>
 
 </Tabs>
+
+
+## Related Articles
+
+- [Import / Export](../personal/import-export.md)
+- [Color Palette Schemes](../personal/color-palette-schemes.md)
+
+> *This article was last updated in June 2023*

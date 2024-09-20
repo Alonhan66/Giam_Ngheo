@@ -1,9 +1,13 @@
+import TracksManager from '../../manager/track/TracksManager';
+
+const PROFILE_LINE = TracksManager.PROFILE_LINE;
+
 export function onOpenSettings() {
-    this.flushState((o) => (o.paused = true));
+    this.flushState((o) => (o.preview = true));
 }
 
 export function onCloseSettings() {
-    this.flushState((o) => (o.paused = false));
+    this.flushState((o) => (o.preview = false));
 }
 
 export function onDragStart() {
@@ -59,7 +63,7 @@ export function onGeoProfile({ type = null, router = null, profile = null, param
         router = geoProfile.router ?? router;
         profile = geoProfile.profile ?? profile;
         params = geoProfile.params ?? params;
-        // console.log('onGeoProfile() with geoProfile', geoProfile);
+        // console.debug('onGeoProfile() with geoProfile', geoProfile);
     }
 
     const picked = this.pickTypeRouterProfile({ type, router, profile });
@@ -72,5 +76,17 @@ export function onGeoProfile({ type = null, router = null, profile = null, param
 
     if (params) {
         this.onParamsChanged({ router: picked.router, profile: picked.profile, params });
+    }
+}
+
+/**
+ * Escape from Line profile.
+ * Called by TracksManager.createTrack()
+ * Used to stick off Line profile after GPX track uploaded.
+ */
+export function escapeFromLineProfile() {
+    if (this.profile === PROFILE_LINE) {
+        const profile = this.fallback.profiles[0].key;
+        this.onGeoProfile({ profile });
     }
 }

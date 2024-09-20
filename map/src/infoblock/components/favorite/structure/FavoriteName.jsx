@@ -3,7 +3,14 @@ import React, { useContext, useEffect, useState } from 'react';
 import contextMenuStyles from '../../../styles/ContextMenuStyles';
 import AppContext from '../../../../context/AppContext';
 
-export default function FavoriteName({ favoriteName, setFavoriteName, favoriteGroup, favorite, setErrorName }) {
+export default function FavoriteName({
+    favoriteName,
+    setFavoriteName,
+    favoriteGroup,
+    favorite,
+    setErrorName,
+    widthDialog,
+}) {
     const menuStyles = contextMenuStyles();
     const ctx = useContext(AppContext);
 
@@ -11,7 +18,7 @@ export default function FavoriteName({ favoriteName, setFavoriteName, favoriteGr
     const [favNames, setFavNames] = useState([]);
 
     useEffect(() => {
-        let group = ctx.favorites[favoriteGroup === null ? favorite?.category : favoriteGroup.name];
+        let group = ctx.favorites?.mapObjs?.[!favoriteGroup ? favorite?.category : favoriteGroup.name];
         let names = [];
         group &&
             group.wpts.forEach((wpt) => {
@@ -48,8 +55,14 @@ export default function FavoriteName({ favoriteName, setFavoriteName, favoriteGr
         }
     }
 
+    useEffect(() => {
+        if (ctx.selectedWpt?.poi) {
+            setFavoriteName(ctx.selectedWpt.poi?.options?.title);
+        }
+    }, [ctx.selectedWpt]);
+
     return (
-        <ListItemText>
+        <ListItemText sx={{ maxWidth: `${widthDialog}px` }}>
             <TextField
                 className={menuStyles.favouriteLineInfo}
                 id="name"

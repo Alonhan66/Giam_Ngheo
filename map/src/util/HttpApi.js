@@ -1,7 +1,7 @@
 import md5 from 'blueimp-md5';
 import { globalNavigate } from '../App';
-import { quickNaNfix } from '../util/Utils';
-import { LOGIN_LOGOUT_URL } from '../context/AccountManager';
+import { LOGIN_LOGOUT_URL } from '../manager/AccountManager';
+import { quickNaNfix, seleniumUpdateActivity } from '../util/Utils';
 
 /*
     The idea: wrap all API requests and handle auth-failed-to-logout answers
@@ -84,6 +84,8 @@ import { LOGIN_LOGOUT_URL } from '../context/AccountManager';
 */
 
 export async function apiGet(url, options = null) {
+    seleniumUpdateActivity(); // update activity timestamp (before and after apiGet)
+
     // parse axios single-parameter call ({ url, ... })
     // it might be url, get/post, data and other options
     // fetch { url }, then shift url (as options) to options
@@ -109,13 +111,20 @@ export async function apiGet(url, options = null) {
     }
 
     // parse query string from options.params (axios)
+    if (options?.params) {
+        Object.keys(options.params).forEach((k) => {
+            if (options.params[k] === undefined) {
+                delete options.params[k];
+            }
+        });
+    }
     const qs = '?' + new URLSearchParams(options?.params || {}).toString();
     const fullURL = url + (qs === '?' ? '' : qs);
 
-    let cacheKey = options?.apiCache ? await generateCacheKey(fullURL, options, options?.body) : null;
+    let cacheKey = options?.apiCache ? await generateCacheKey(fullURL, options) : null;
 
     if (cacheKey && cache[cacheKey]) {
-        // console.log('cache-hit'); //, cacheKey);
+        // console.debug('cache-hit', url, cacheKey);
         return cache[cacheKey]; // TODO think about cloneDeep() here
     }
 
@@ -126,7 +135,7 @@ export async function apiGet(url, options = null) {
         response = await fetch(fullURL, fullOptions);
     } catch (e) {
         // got general error (have no response)
-        console.log('fetch-catch-error', url, e);
+        console.debug('fetch-catch-error', url, e);
         const ret = { ok: false, text: () => null, json: () => null, blob: () => null, data: null };
         if (options?.throwErrors) {
             const error = new Error('fetch-catch-error');
@@ -140,7 +149,7 @@ export async function apiGet(url, options = null) {
     // got blocked redirect
     if (response.type === 'opaqueredirect') {
         globalNavigate(LOGIN_LOGOUT_URL);
-        console.log('fetch-redirect-stop', url);
+        console.error('fetch-redirect-stop', url);
         const ret = Object.assign(response, { text: () => null, json: () => null, blob: () => null, data: null });
         if (options?.throwErrors) {
             const error = new Error('fetch-redirect-stop');
@@ -153,7 +162,7 @@ export async function apiGet(url, options = null) {
 
     // got http-error
     if (!response.ok) {
-        // console.log('fetch-http-error', url);
+        // console.debug('fetch-http-error', url);
         const data = options?.dataOnErrors ? await response.clone().text() : null; // axios-style: body as data
         const ret = Object.assign(response, { data }); // keep original text/json/blob
         if (options?.throwErrors) {
@@ -178,17 +187,17 @@ export async function apiGet(url, options = null) {
         try {
             // pure json
             data = await response.clone().json();
-            // console.log('fetch-json-ok', url);
+            // console.debug('fetch-json-ok', url);
         } catch (e) {
             // try NaN fix (fast method, with 2 regexp, without callback)
             try {
                 const bad = await response.clone().text();
                 data = JSON.parse(quickNaNfix(bad));
-                // console.log('fetch-json-fix', url);
+                // console.debug('fetch-json-fix', url);
             } catch {
                 // text, finally
                 data = await response.clone().text();
-                // console.log('fetch-json-text', url, e);
+                // console.debug('fetch-json-text', url, e);
             }
         }
     } else {
@@ -198,17 +207,17 @@ export async function apiGet(url, options = null) {
             options?.responseType === 'arraybuffer' // arraybuffer data tested on download-backup
         ) {
             data = await response.clone().blob();
-            // console.log('fetch-blob-data', url, contentType);
+            // console.debug('fetch-blob-data', url, contentType);
         } else {
             // finally, get text by default
             data = await response.clone().text();
-            // console.log('fetch-text-string', url, contentType);
+            // console.debug('fetch-text-string', url, contentType);
         }
     }
 
     // store cache
     if (cacheKey) {
-        // console.log('cache-store', cacheKey);
+        // console.debug('cache-store', cacheKey);
         const cached = Object.assign(response, {
             data, // axios
             blob: async () => await response.clone().blob(), // resolved
@@ -217,6 +226,8 @@ export async function apiGet(url, options = null) {
         });
         cache[cacheKey] = cached;
     }
+
+    seleniumUpdateActivity();
 
     return Object.assign(response, {
         data, // data is for axios lovers :)
@@ -257,18 +268,18 @@ export async function apiPost(url, data = '', options = null) {
                 type = 'application/json';
             } else {
                 // defaults used (empty body, empty type)
-                console.log('post-unknown-data', url, typeof data, data);
+                console.error('post-unknown-data', url, typeof data, data);
             }
         }
     }
-    // console.log('post-data', url, type, typeof data, data);
+    // console.debug('post-data', url, type, typeof data, data);
 
     // parse headers from options, override optional Content-Type
     const contentType = type ? { 'Content-Type': type } : {}; // null?
     const headers = Object.assign({}, options?.headers || {}, contentType);
     const fullOptions = Object.assign({}, options, { method: 'POST' }, { headers }, { body });
 
-    // console.log('fetch-post', url, fullOptions);
+    // console.debug('fetch-post', url, fullOptions);
     return apiGet(url, fullOptions);
 }
 
@@ -285,23 +296,39 @@ function isFormData(data) {
 
 const cache = {};
 
+// use native digest
+export async function digest(string) {
+    let hash = null;
+    try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(string);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+        hash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+    } catch {
+        hash = md5(string);
+    }
+    return hash;
+}
+
 // hash deeply through FormData and File objects
-async function generateCacheKey(url, options = null, body = null) {
-    const opts = options ? md5(JSON.stringify(options)) : '';
+async function generateCacheKey(url, options = null) {
+    const opts = options ? await digest(JSON.stringify(options)) : '';
 
-    let data = body ?? '';
+    let form = '';
+    const body = options?.body;
 
-    if (isFormData(body)) {
+    if (body && isFormData(body)) {
         for (const [k, v] of body.entries()) {
-            data = md5(data + k);
+            form = await digest(form + k);
             if (v.toString() === '[object File]') {
-                data = md5(data + v.name + v.size);
-                data = md5(data + (await v.text()));
+                form = await digest(form + v.name + v.size);
+                form = await digest(form + (await v.text()));
             } else {
-                data = md5(data + JSON.stringify(v));
+                form = await digest(form + JSON.stringify(v));
             }
         }
     }
 
-    return md5(url + opts + data);
+    return await digest(url + opts + form);
 }

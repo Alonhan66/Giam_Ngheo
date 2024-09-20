@@ -1,13 +1,43 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useCookie from 'react-use-cookie';
-import Utils from '../util/Utils';
-import TracksManager from './TracksManager';
-import _ from 'lodash';
-import FavoritesManager from './FavoritesManager';
-import PoiManager from './PoiManager';
+import Utils, { seleniumUpdateActivity, useMutator } from '../util/Utils';
+import TracksManager, { getGpxFiles } from '../manager/track/TracksManager';
+import { addOpenedFavoriteGroups } from '../manager/FavoritesManager';
+import PoiManager, { getCategoryIcon } from '../manager/PoiManager';
 import { apiGet } from '../util/HttpApi';
 import { geoRouter } from '../store/geoRouter/geoRouter.js';
-import WeatherManager from './WeatherManager';
+import { geoObject } from '../store/geoObject/geoObject.js';
+import WeatherManager from '../manager/WeatherManager';
+import { getAccountInfo, INIT_LOGIN_STATE } from '../manager/LoginManager';
+import { cloneDeep, isEmpty } from 'lodash';
+import { INTERACTIVE_LAYER } from '../map/layers/CustomTileLayer';
+
+export const OBJECT_TYPE_LOCAL_TRACK = 'local_track'; // track in localStorage
+export const OBJECT_TYPE_CLOUD_TRACK = 'cloud_track'; // track in OsmAnd Cloud
+
+export const OBJECT_TYPE_NAVIGATION_TRACK = 'route_track'; // track converted from Navigation result
+export const OBJECT_TYPE_NAVIGATION_ALONE = 'navigation'; // special case of OBJECT_TYPE_NAVIGATION_TRACK (Navigation w/o InfoBlock)
+
+export const OBJECT_TYPE_FAVORITE = 'favorite';
+export const OBJECT_TYPE_WEATHER = 'weather';
+export const OBJECT_TYPE_POI = 'poi';
+
+export const OBJECT_CONFIGURE_MAP = 'configure_map';
+export const OBJECT_EXPLORE = 'explore';
+export const OBJECT_SEARCH = 'search';
+export const OBJECT_GLOBAL_SETTINGS = 'global_settings';
+export const LOCAL_STORAGE_CONFIGURE_MAP = 'configureMap';
+
+export const defaultConfigureMapStateValues = {
+    showFavorites: true,
+    showPoi: false,
+    showTracks: false,
+};
+
+export const isLocalTrack = (ctx) => ctx.currentObjectType === OBJECT_TYPE_LOCAL_TRACK;
+export const isCloudTrack = (ctx) => ctx.currentObjectType === OBJECT_TYPE_CLOUD_TRACK;
+export const isRouteTrack = (ctx) => ctx.currentObjectType === OBJECT_TYPE_NAVIGATION_TRACK;
+export const isTrack = (ctx) => isLocalTrack(ctx) || isCloudTrack(ctx) || isRouteTrack(ctx);
 
 const osmandTileURL = {
     uiname: 'Mapnik (tiles)',
@@ -16,177 +46,107 @@ const osmandTileURL = {
     url: 'https://tile.osmand.net/hd/{z}/{x}/{y}.png',
 };
 
-let monthNames = {};
-
-function evaluateMonthNames() {
-    if (Object.keys(monthNames).length > 0) {
-        return monthNames;
-    }
-    for (var i = 0; i < 12; i++) {
-        var objDate = new Date();
-        objDate.setDate(1);
-        objDate.setMonth(i);
-        monthNames[objDate.toLocaleString('en-us', { month: 'short' })] = i + 1;
-        monthNames[
-            objDate.toLocaleString(window.navigator.userLanguage || window.navigator.language, { month: 'short' })
-        ] = i + 1;
-    }
-    return monthNames;
-}
-
-export const toHHMMSS = function (time) {
-    var sec_num = time / 1000;
-    var hours = Math.floor(sec_num / 3600);
-    var minutes = Math.floor((sec_num - hours * 3600) / 60);
-    var seconds = sec_num - hours * 3600 - minutes * 60;
-
-    if (hours < 10) {
-        hours = '0' + hours;
-    }
-    if (minutes < 10) {
-        minutes = '0' + minutes;
-    }
-    if (seconds < 10) {
-        seconds = '0' + Math.round(seconds);
-    }
-    return hours + ':' + minutes + ':' + seconds;
-};
-
-export const getGpxTime = (f) => {
-    if (f?.details?.analysis?.startTime) {
-        return f.details.analysis.startTime;
-    }
-    let dt = f.name.match(/(20\d\d)-(\d\d)-(\d\d)/);
-    if (!dt) {
-        dt = f.name.match(/(20\d\d)(\d\d)(\d\d)/);
-    }
-    try {
-        if (dt) {
-            let date = new Date();
-            date.setFullYear(parseInt(dt[1]));
-            date.setMonth(parseInt(dt[2]) - 1);
-            date.setDate(parseInt(dt[3]));
-            return date.getTime();
-        } else {
-            dt = f.name.match(/(\d\d) (...) (20\d\d)/);
-            if (dt) {
-                let monthNames = evaluateMonthNames();
-                if (monthNames[dt[2]]) {
-                    let date = new Date();
-                    date.setFullYear(parseInt(dt[3]));
-                    date.setMonth(monthNames[dt[2]] - 1);
-                    date.setDate(parseInt(dt[1]));
-                    return date.getTime();
-                }
-            }
-        }
-    } catch (e) {
-        console.error('getGpxTime', e);
-    }
-    return 0;
-};
-
-async function loadListFiles(loginUser, listFiles, setListFiles, setGpxLoading, gpxFiles, setGpxFiles, setFavorites) {
+async function loadListFiles(
+    loginUser,
+    listFiles,
+    setListFiles,
+    gpxFiles,
+    setGpxFiles,
+    setFavorites,
+    setUpdateMarkers,
+    setProcessingGroups,
+    setVisibleTracks
+) {
     if (loginUser !== listFiles.loginUser) {
         if (!loginUser) {
             setListFiles({});
             setFavorites({});
         } else {
-            setGpxLoading(true);
             const response = await apiGet(`${process.env.REACT_APP_USER_API_SITE}/mapapi/list-files`, {});
-            await response.json().then((res) => {
-                if (res) {
-                    res.loginUser = loginUser;
-                    res.totalUniqueZipSize = 0;
-                    res.uniqueFiles.forEach((f) => {
-                        res.totalUniqueZipSize += f.zipSize;
-                    });
-                    res.uniqueFiles = res.uniqueFiles.sort((f, s) => {
-                        let ftime = getGpxTime(f);
-                        let stime = getGpxTime(s);
-                        if (ftime !== stime) {
-                            return ftime > stime ? -1 : 1;
-                        }
-                        return 0;
-                    });
-                    setListFiles(res);
-                    setGpxLoading(false);
-
-                    addOpenedTracks(TracksManager.getTracks(res), gpxFiles, setGpxFiles).then();
-                    addOpenedFavoriteGroups(TracksManager.getFavoriteGroups(res), setFavorites);
-                }
-            });
-        }
-    }
-}
-
-async function addOpenedFavoriteGroups(files, setFavorites) {
-    files.sort((a, b) => a.name.localeCompare(b.name));
-    let newFavoritesFiles = {
-        groups: [],
-    };
-    files.forEach((file) => {
-        let group = FavoritesManager.createGroup(file);
-        newFavoritesFiles.groups.push(group);
-    });
-    newFavoritesFiles.groups = FavoritesManager.orderList(
-        newFavoritesFiles.groups,
-        FavoritesManager.DEFAULT_GROUP_NAME
-    );
-
-    let savedVisible = JSON.parse(localStorage.getItem(FavoritesManager.FAVORITE_LOCAL_STORAGE));
-
-    if (savedVisible) {
-        for (const name of savedVisible) {
-            for (const f of newFavoritesFiles.groups) {
-                if (f.name === name) {
-                    let url = `${process.env.REACT_APP_USER_API_SITE}/mapapi/download-file?type=${encodeURIComponent(
-                        f.file.type
-                    )}&name=${encodeURIComponent(f.file.name)}`;
-                    newFavoritesFiles[f.name] = {
-                        url: url,
-                        clienttimems: f.file.clienttimems,
-                        updatetimems: f.file.updatetimems,
-                        name: f.file.name,
-                        addToMap: true,
-                    };
-                    let res = await Utils.getFileData(newFavoritesFiles[f.name]);
+            if (response.ok) {
+                await response.json().then(async (res) => {
                     if (res) {
-                        const favoriteFile = new File([res], f.file.name, {
-                            type: 'text/plain',
+                        res.loginUser = loginUser;
+                        res.totalUniqueZipSize = 0;
+                        res.uniqueFiles.forEach((f) => {
+                            res.totalUniqueZipSize += f.zipSize;
                         });
-                        let favorites = await TracksManager.getTrackData(favoriteFile);
-                        if (favorites) {
-                            favorites.name = f.file.name;
-                        }
-                        Object.keys(favorites).forEach((t) => {
-                            newFavoritesFiles[f.name][`${t}`] = favorites[t];
-                        });
+                        setListFiles(res);
+
+                        await Promise.all([
+                            addOpenedTracks(getGpxFiles(res), gpxFiles, setGpxFiles, setVisibleTracks),
+                            addOpenedFavoriteGroups(
+                                TracksManager.getFavoriteGroups(res),
+                                setFavorites,
+                                setUpdateMarkers,
+                                setProcessingGroups
+                            ),
+                        ]);
                     }
-                }
+                });
             }
         }
     }
-    setFavorites(newFavoritesFiles);
 }
 
-async function addOpenedTracks(files, gpxFiles, setGpxFiles) {
+async function addOpenedTracks(files, gpxFiles, setGpxFiles, setVisibleTracks) {
     const promises = [];
     const newGpxFiles = Object.assign({}, gpxFiles);
 
     let savedVisible = JSON.parse(localStorage.getItem(TracksManager.TRACK_VISIBLE_FLAG));
-    let selectedFiles = [];
-    if (savedVisible?.cloud) {
-        savedVisible.cloud.forEach((name) => {
-            files.forEach((f) => {
-                if (f.name === name) {
-                    selectedFiles.push(_.indexOf(files, f));
-                }
-            });
+
+    let newVisFiles = {
+        old: [],
+        new: [],
+    };
+
+    let newVisFilesNames = {
+        old: savedVisible?.old ? savedVisible?.old : [],
+        new: [],
+        open: [],
+    };
+
+    let newSelectedFiles = [];
+    let oldSelectedFiles = [];
+    if (savedVisible?.new && savedVisible.new.length > 0) {
+        savedVisible.new.forEach((name) => {
+            if (savedVisible.open.includes(name)) {
+                newVisFilesNames.new.push(name);
+                newVisFilesNames.open.push(name);
+            } else {
+                newVisFilesNames.old.push(name);
+            }
+        });
+
+        newVisFilesNames.new.forEach((name) => {
+            const matchingFileInd = files.findIndex((f) => f.name === name);
+            if (matchingFileInd !== -1) {
+                newSelectedFiles.push(matchingFileInd);
+            }
         });
     }
+    newVisFilesNames.old = newVisFilesNames?.old.splice(-10);
+    newVisFilesNames.old.forEach((name) => {
+        const matchingFileInd = files.findIndex((f) => f.name === name);
+        if (matchingFileInd !== -1) {
+            oldSelectedFiles.push(matchingFileInd);
+        }
+    });
 
-    for (let ind of selectedFiles) {
+    for (let ind of oldSelectedFiles) {
+        let file = files[ind];
+        newGpxFiles[file.name] = {
+            url: null,
+            clienttimems: file.clienttimems,
+            updatetimems: file.updatetimems,
+            showOnMap: false,
+            name: file.name,
+            type: 'GPX',
+        };
+        newVisFiles.old.push(newGpxFiles[file.name]);
+    }
+
+    for (let ind of newSelectedFiles) {
         let file = files[ind];
         let url = `${process.env.REACT_APP_USER_API_SITE}/mapapi/download-file?type=${encodeURIComponent(
             file.type
@@ -195,6 +155,7 @@ async function addOpenedTracks(files, gpxFiles, setGpxFiles) {
             url: url,
             clienttimems: file.clienttimems,
             updatetimems: file.updatetimems,
+            showOnMap: true,
             name: file.name,
             type: 'GPX',
         };
@@ -207,29 +168,39 @@ async function addOpenedTracks(files, gpxFiles, setGpxFiles) {
             TracksManager.getTrackData(gpxfile).then((track) => {
                 track.name = file.name;
                 Object.keys(track).forEach((t) => {
-                    newGpxFiles[file.name][`${t}`] = track[t];
+                    newGpxFiles[file.name][t] = track[t];
                 });
+                newVisFiles.new.push(newGpxFiles[file.name]);
             })
         );
     }
+
     await Promise.all(promises).then(() => {
         setGpxFiles(newGpxFiles);
+        setVisibleTracks(newVisFiles);
     });
+
+    localStorage.setItem(TracksManager.TRACK_VISIBLE_FLAG, JSON.stringify(newVisFilesNames));
 }
 
-async function checkUserLogin(loginUser, setLoginUser, userEmail, setUserEmail) {
+async function checkUserLogin(loginUser, setLoginUser, emailCookie, setEmailCookie, setAccountInfo) {
     const response = await apiGet(`${process.env.REACT_APP_USER_API_SITE}/mapapi/auth/info`, {
         method: 'GET',
     });
-    if (response.ok) {
+    if (response.data) {
+        if (loginUser !== INIT_LOGIN_STATE) {
+            await getAccountInfo(setAccountInfo);
+        }
         const user = await response.json();
         let newUser = user?.username;
         if (loginUser !== newUser) {
             if (newUser) {
-                setUserEmail(newUser, { days: 30, SameSite: 'Strict' });
+                setEmailCookie(newUser, { days: 30, SameSite: 'Strict' });
             }
             setLoginUser(newUser);
         }
+    } else {
+        setLoginUser(null);
     }
 }
 
@@ -237,9 +208,16 @@ async function loadTileUrls(setAllTileURLs) {
     const response = await apiGet(`${process.env.REACT_APP_TILES_API_SITE}/tile/styles`, {});
     if (response.ok) {
         let data = await response.json();
+
+        data[INTERACTIVE_LAYER] = createInteractiveMap(data, 'hd');
+
         Object.values(data).forEach((item) => {
             item.tileSize = 256 << item.tileSizeLog;
             item.url = process.env.REACT_APP_TILES_API_SITE + '/tile/' + item.key + '/{z}/{x}/{y}.png';
+            if (item.key === INTERACTIVE_LAYER) {
+                item.infoUrl =
+                    process.env.REACT_APP_TILES_API_SITE + '/tile/' + 'info/' + item.key + '/{z}/{x}/{y}.json';
+            }
             item.uiname = item.name.charAt(0).toUpperCase() + item.name.slice(1);
             if (item.tileSize > 256) {
                 item.uiname += ' HD';
@@ -250,90 +228,95 @@ async function loadTileUrls(setAllTileURLs) {
     }
 }
 
+function createInteractiveMap(data, type) {
+    let interactiveMap = cloneDeep(data[type]);
+    const name = type === 'hd' ? INTERACTIVE_LAYER : `${INTERACTIVE_LAYER}-${type}`;
+    interactiveMap.name = 'Interactive';
+    interactiveMap.key = name;
+
+    return interactiveMap;
+}
+
 const AppContext = React.createContext();
 
 export const AppContextProvider = (props) => {
-    const OBJECT_TYPE_FAVORITE = 'favorite';
-    const OBJECT_TYPE_CLOUD_TRACK = 'cloud_track';
-    const OBJECT_TYPE_LOCAL_CLIENT_TRACK = 'local_client_track';
-    const OBJECT_TYPE_WEATHER = 'weather';
-    const OBJECT_TYPE_POI = 'poi';
+    seleniumUpdateActivity();
+
+    const [globalConfirmation, setGlobalConfirmation] = useState(null);
+    const [fitBoundsPadding, mutateFitBoundsPadding] = useMutator({ left: 0, top: 0, right: 0, bottom: 0 });
+
+    const [openMenu, setOpenMenu] = useState(null);
+    const [openContextMenu, setOpenContextMenu] = useState(false);
+
+    const [cloudSettings, setCloudSettings] = useState({
+        changes: false,
+        trash: false,
+    });
+
+    //pages
+    const [prevPageUrl, setPrevPageUrl] = useState(null);
+    const [pageParams, setPageParams] = useState({});
 
     const searchParams = new URLSearchParams(window.location.search);
+    // weather
     const [weatherLayers, setWeatherLayers] = useState(WeatherManager.getLayers());
-    const [weatherDate, setWeatherDate] = useState(WeatherManager.getWeatherDate());
+    const [weatherDate, setWeatherDate] = useState(new Date());
     const [weatherType, setWeatherType] = useState('gfs');
+    const [renderingType, setRenderingType] = useState(null);
+    const [forecastLoading, setForecastLoading] = useState(false);
+    const [mapBbox, setMapBbox] = useState(null);
+
     const [gpxLoading, setGpxLoading] = useState(false);
     const [localTracksLoading, setLocalTracksLoading] = useState(false);
     // cookie to store email logged in
-    const [userEmail, setUserEmail] = useCookie('email', '');
-    // server state of login
-    const [loginUser, setLoginUser] = useState(null);
+    const [emailCookie, setEmailCookie] = useCookie('email', '');
+    // login
+    const [loginUser, setLoginUser] = useState(INIT_LOGIN_STATE);
+    const [openLoginMenu, setOpenLoginMenu] = useState(false);
+    const [loginState, setLoginState] = useState({ default: true });
+    const [accountInfo, setAccountInfo] = useState(null);
+    const [wantDeleteAcc, setWantDeleteAcc] = useState(false);
+    const [loginError, setLoginError] = useState(null);
+    // files
     const [listFiles, setListFiles] = useState({});
-    const [gpxFiles, setGpxFiles] = useState({});
-    const [searchCtx, setSearchCtx] = useState({});
+    const [gpxFiles, mutateGpxFiles, setGpxFiles] = useMutator({});
+    // search
+    const searchTooltipRef = useRef(null);
+    const searchPointerRef = useRef(null);
+    const [searchQuery, setSearchQuery] = useState(null);
+    const [searchResult, setSearchResult] = useState(null);
+    const [processingSearch, setProcessingSearch] = useState(false);
+    const [zoomToMapObj, setZoomToMapObj] = useState(false);
 
-    const [selectedGpxFile, reactSetSelectedGpxFile] = useState({});
-    const setSelectedGpxFile = (s) => {
-        reactSetSelectedGpxFile(() => s); // convert setState({}) to queued setState(() => {})
-    };
+    const [selectedGpxFile, setSelectedGpxFile] = useState({});
+    const [unverifiedGpxFile, setUnverifiedGpxFile] = useState(null); // see Effect in LocalClientTrackLayer
 
     const [mapMarkerListener, setMapMarkerListener] = useState(null);
     const [tracksGroups, setTracksGroups] = useState([]);
-    //
+
     const [tileURL, setTileURL] = useState(osmandTileURL);
     const [allTileURLs, setAllTileURLs] = useState({});
-    // route
-    const [routeData, setRouteData] = useState(null);
-    const [routeTrackFile, setRouteTrackFile] = useState(null);
-    const [routeShowPoints, setRouteShowPoints] = useState(true);
-    let startInit,
-        endInit,
-        pinInit,
-        interInit = [],
-        avoidInit = [];
-    if (searchParams.get('start')) {
-        let arr = searchParams.get('start').split(',');
-        startInit = { lat: parseFloat(arr[0]), lng: parseFloat(arr[1]) };
-    }
-    if (searchParams.get('end')) {
-        let arr = searchParams.get('end').split(',');
-        endInit = { lat: parseFloat(arr[0]), lng: parseFloat(arr[1]) };
-    }
+
+    let pinInit;
     if (searchParams.get('pin')) {
         let arr = searchParams.get('pin').split(',');
         pinInit = { lat: parseFloat(arr[0]), lng: parseFloat(arr[1]) };
     }
-    if (searchParams.get('inter')) {
-        searchParams
-            .get('inter')
-            .split(';')
-            .forEach((ll) => {
-                const [lat, lng] = ll.split(',');
-                interInit.push({ lat: parseFloat(lat), lng: parseFloat(lng) });
-            });
-    }
-    if (searchParams.get('avoid')) {
-        searchParams
-            .get('avoid')
-            .split(';')
-            .forEach((id) => {
-                avoidInit.push({ id, name: 'Way ' + Math.trunc(id / 64) });
-            });
-    }
-    const [startPoint, setStartPoint] = useState(startInit);
-    const [endPoint, setEndPoint] = useState(endInit);
     const [pinPoint, setPinPoint] = useState(pinInit);
-    const [interPoints, setInterPoints] = useState(interInit);
-    const [avoidRoads, setAvoidRoads] = useState(avoidInit);
-    const [weatherPoint, setWeatherPoint] = useState(null);
+
+    // favorites
     const [favorites, setFavorites] = useState({});
+    const [updateMarkers, setUpdateMarkers] = useState(null);
+    const [zoomToFavGroup, setZoomToFavGroup] = useState(null);
     const [addFavorite, setAddFavorite] = useState({
         add: false,
         location: null,
     });
+    const [processingGroups, setProcessingGroups] = useState(false);
 
     const [localTracks, setLocalTracks] = useState([]);
+    const [visibleTracks, setVisibleTracks] = useState({});
+    const [openVisibleMenu, setOpenVisibleMenu] = useState(false);
     const [currentObjectType, setCurrentObjectType] = useState(null);
     const [headerText, setHeaderText] = useState({
         search: { text: '' },
@@ -343,41 +326,78 @@ export const AppContextProvider = (props) => {
         welcome: { text: process.env.REACT_APP_WEBSITE_NAME },
     });
     const [createTrack, setCreateTrack] = useState(null);
-    const [gpxCollection, setGpxCollection] = useState([]);
     const [loadingContextMenu, setLoadingContextMenu] = useState(false);
-    const [updateContextMenu, setUpdateContextMenu] = useState(false);
+    const [loadingContextItem, setLoadingContextItem] = useState(null);
+    const [updateInfoBlock, setUpdateInfoBlock] = useState(false);
     const [trackProfileManager, setTrackProfileManager] = useState({});
     const [pointContextMenu, setPointContextMenu] = useState({});
     const [routingErrorMsg, setRoutingErrorMsg] = useState(null);
+    const [trackErrorMsg, setTrackErrorMsg] = useState(null);
     const [trackState, setTrackState] = useState({
-        pastStates: [],
-        futureStates: [],
+        update: false, // push track to undo/redo
+        // pastStates: [], // was used for logs
+        // futureStates: [], // was used for logs
     });
     const [openedPopper, setOpenedPopper] = useState(null);
+
+    //poi
     const [showPoiCategories, setShowPoiCategories] = useState([]);
     const [poiCategory, setPoiCategories] = useState(null);
+    const [poiIconCache, setPoiIconCache] = useState({});
+    const [categoryIcons, setCategoryIcons] = useState({});
 
-    const [routingCash, setRoutingCash] = useState([]);
+    const [wikiPlaces, setWikiPlaces] = useState(null);
+    const [photoGallery, setPhotoGallery] = useState(null);
+    const [selectedPhotoInd, setSelectedPhotoInd] = useState(-1);
+    const [searchSettings, setSearchSettings] = useState({});
+
+    const [routingCache, mutateRoutingCache] = useMutator({});
     const [routingNewSegments, setRoutingNewSegments] = useState([]);
     const [processRouting, setProcessRouting] = useState(false);
     const [selectedWpt, setSelectedWpt] = useState(null);
 
-    const [routeRouter, setRouteRouter] = useState(() => new geoRouter());
+    const [routeTrackFile, setRouteTrackFile] = useState(null);
+
+    const [trackLoading, setTrackLoading] = useState([]);
+
+    const [routeObject, setRouteObject] = useState(() => new geoObject());
     const [trackRouter, setTrackRouter] = useState(() => new geoRouter());
     const [afterPointRouter, setAfterPointRouter] = useState(() => new geoRouter());
     const [beforePointRouter, setBeforePointRouter] = useState(() => new geoRouter());
 
-    const [trackRange, setTrackRange] = useState(null);
-    const [showPoints, setShowPoints] = useState({
-        points: true,
-        wpts: true,
-    });
-    const [devMode, setDevMode] = useState(false);
+    const [selectedPoiId, setSelectedPoiId] = useState(null);
 
-    routeRouter.initSetter({ setter: setRouteRouter });
+    routeObject.initSetter({ setter: setRouteObject });
     trackRouter.initSetter({ setter: setTrackRouter });
     afterPointRouter.initSetter({ setter: setAfterPointRouter });
     beforePointRouter.initSetter({ setter: setBeforePointRouter });
+
+    const [trackRange, setTrackRange] = useState(null);
+
+    const [showPoints, mutateShowPoints] = useMutator({
+        points: true,
+        wpts: true,
+    });
+
+    const [develFeatures, setDevelFeatures] = useState(process.env.REACT_APP_DEVEL_FEATURES === 'yes');
+    const [infoBlockWidth, setInfoBlockWidth] = useState(0);
+
+    const [configureMapState, setConfigureMapState] = useState(getConfigureMap);
+
+    const [selectedSort, setSelectedSort] = useState({});
+
+    function getConfigureMap() {
+        let savedConfigureMap = localStorage.getItem(LOCAL_STORAGE_CONFIGURE_MAP);
+        return savedConfigureMap ? JSON.parse(savedConfigureMap) : defaultConfigureMapStateValues;
+    }
+
+    useEffect(() => {
+        if (wantDeleteAcc) {
+            setLoginError('Please log in to delete your account.');
+        } else {
+            setLoginError(null);
+        }
+    }, [wantDeleteAcc]);
 
     useEffect(() => {
         TracksManager.loadTracks(setLocalTracksLoading).then((tracks) => {
@@ -390,15 +410,39 @@ export const AppContextProvider = (props) => {
             PoiManager.getTopPoiFilters(setLocalTracksLoading).then((filters) => {
                 setPoiCategories({
                     categories: categories,
-                    filters: filters,
+                    filters: removeUnusedFilters(filters),
                 });
             });
         });
+
+        function removeUnusedFilters(filters) {
+            if (filters) {
+                return filters.filter((f) => f !== 'routes');
+            }
+            return null;
+        }
     }, []);
 
     useEffect(() => {
+        async function loadIcons() {
+            const icons = {};
+            const filters = poiCategory?.filters;
+
+            if (filters) {
+                for (const filter of filters) {
+                    icons[filter] = await getCategoryIcon(filter);
+                }
+                setCategoryIcons(icons);
+            }
+        }
+        if (isEmpty(categoryIcons) && poiCategory !== null && poiCategory?.filters !== null) {
+            loadIcons().then();
+        }
+    }, [poiCategory?.filters]);
+
+    useEffect(() => {
         const sequentialLoad = async () => {
-            await routeRouter.loadProviders({ parseQueryString: true });
+            await routeObject.loadProviders({ parseQueryString: true });
             await trackRouter.loadProviders();
             await afterPointRouter.loadProviders();
             await beforePointRouter.loadProviders();
@@ -407,124 +451,78 @@ export const AppContextProvider = (props) => {
     }, []);
 
     useEffect(() => {
-        if (routeRouter.isReady() && routeTrackFile) {
-            routeRouter.calculateGpxRoute({
-                routeTrackFile,
-                setRouteData,
-                setStartPoint,
-                setEndPoint,
-                setInterPoints,
-                changeRouteText,
-                setRoutingErrorMsg,
-            });
-        }
-    }, [routeRouter.getEffectDeps(), routeTrackFile]); // setRouteData, setStartPoint, setEndPoint
-
-    useEffect(() => {
-        if (routeRouter.isReady() && !routeTrackFile && startPoint && endPoint) {
-            routeRouter.calculateRoute({
-                startPoint,
-                endPoint,
-                interPoints,
-                avoidRoads,
-                setRouteData,
-                changeRouteText,
-                setRoutingErrorMsg,
-            });
-        } else {
-            if (!routeTrackFile) {
-                setHeaderText((prevState) => ({
-                    ...prevState,
-                    route: { text: `` },
-                }));
-            }
-        }
-        // ! routeTrackFile is not part of dependency ! really? :)
-    }, [routeRouter.getEffectDeps(), startPoint, endPoint, interPoints, routeTrackFile, avoidRoads]); // ,setRouteData
-
-    function changeRouteText(processRoute, data) {
-        let resultText = ``;
-        if (processRoute) {
-            resultText = `Route calculating…`;
-        } else {
-            if (data) {
-                const { name } = routeRouter.getProfile();
-                const dist = data.props.overall?.distance ? data.props.overall?.distance : data.props.distance;
-                resultText = `Route ${Math.round(dist / 100) / 10.0} km for ${name} is found.`;
-            }
-        }
-        setHeaderText((prevState) => ({
-            ...prevState,
-            route: { text: resultText },
-        }));
-    }
-
-    useEffect(() => {
         loadTileUrls(setAllTileURLs);
     }, []);
 
     useEffect(() => {
-        checkUserLogin(loginUser, setLoginUser, userEmail, setUserEmail);
+        checkUserLogin(loginUser, setLoginUser, emailCookie, setEmailCookie, setAccountInfo);
     }, [loginUser]);
 
     useEffect(() => {
-        loadListFiles(loginUser, listFiles, setListFiles, setGpxLoading, gpxFiles, setGpxFiles, setFavorites);
+        if (loginUser !== INIT_LOGIN_STATE) {
+            setGpxLoading(true);
+            loadListFiles(
+                loginUser,
+                listFiles,
+                setListFiles,
+                gpxFiles,
+                setGpxFiles,
+                setFavorites,
+                setUpdateMarkers,
+                setProcessingGroups,
+                setVisibleTracks
+            ).finally(() => setGpxLoading(false));
+        }
     }, [loginUser]);
+
+    const [openGroups, setOpenGroups] = useState([]);
+
+    const [stopUseGeoLocation, setStopUseGeoLocation] = useState(false);
 
     return (
         <AppContext.Provider
             value={{
+                globalConfirmation,
+                setGlobalConfirmation,
                 weatherLayers,
                 setWeatherLayers,
                 weatherDate,
                 setWeatherDate,
                 weatherType,
                 setWeatherType,
-                userEmail,
-                setUserEmail,
+                emailCookie,
+                setEmailCookie,
                 listFiles,
                 setListFiles,
                 loginUser,
                 setLoginUser,
                 gpxFiles,
                 setGpxFiles,
+                mutateGpxFiles,
                 gpxLoading,
                 setGpxLoading,
                 selectedGpxFile,
                 setSelectedGpxFile,
+                unverifiedGpxFile,
+                setUnverifiedGpxFile,
                 mapMarkerListener,
                 setMapMarkerListener,
                 tileURL,
                 setTileURL,
                 allTileURLs,
-                startPoint,
-                setStartPoint,
-                endPoint,
-                setEndPoint,
                 pinPoint,
                 setPinPoint,
-                interPoints,
-                setInterPoints,
-                routeData,
-                setRouteData,
-                routeRouter,
                 trackRouter,
                 afterPointRouter,
                 beforePointRouter,
-                routeShowPoints,
-                setRouteShowPoints,
-                weatherPoint,
-                setWeatherPoint,
                 routeTrackFile,
                 setRouteTrackFile,
-                searchCtx,
-                setSearchCtx,
+                searchQuery,
+                setSearchQuery,
                 favorites,
                 setFavorites,
                 addFavorite,
                 setAddFavorite,
-                avoidRoads,
-                setAvoidRoads,
                 localTracks,
                 setLocalTracks,
                 currentObjectType,
@@ -533,19 +531,12 @@ export const AppContextProvider = (props) => {
                 setHeaderText,
                 tracksGroups,
                 setTracksGroups,
-                OBJECT_TYPE_FAVORITE,
-                OBJECT_TYPE_CLOUD_TRACK,
-                OBJECT_TYPE_LOCAL_CLIENT_TRACK,
-                OBJECT_TYPE_WEATHER,
-                OBJECT_TYPE_POI,
                 createTrack,
                 setCreateTrack,
-                gpxCollection,
-                setGpxCollection,
                 loadingContextMenu,
                 setLoadingContextMenu,
-                updateContextMenu,
-                setUpdateContextMenu,
+                updateInfoBlock,
+                setUpdateInfoBlock,
                 trackProfileManager,
                 setTrackProfileManager,
                 routingErrorMsg,
@@ -558,8 +549,10 @@ export const AppContextProvider = (props) => {
                 setLocalTracksLoading,
                 openedPopper,
                 setOpenedPopper,
-                routingCash,
-                setRoutingCash,
+                routingCache,
+                mutateRoutingCache,
+                poiIconCache,
+                setPoiIconCache,
                 routingNewSegments,
                 setRoutingNewSegments,
                 processRouting,
@@ -569,13 +562,88 @@ export const AppContextProvider = (props) => {
                 trackRange,
                 setTrackRange,
                 showPoints,
-                setShowPoints,
+                mutateShowPoints,
                 showPoiCategories,
                 setShowPoiCategories,
                 poiCategory,
                 setPoiCategories,
-                devMode,
-                setDevMode,
+                develFeatures,
+                setDevelFeatures,
+                infoBlockWidth,
+                setInfoBlockWidth,
+                wantDeleteAcc,
+                setWantDeleteAcc,
+                routeObject,
+                fitBoundsPadding,
+                mutateFitBoundsPadding,
+                openGroups,
+                setOpenGroups,
+                trackErrorMsg,
+                setTrackErrorMsg,
+                trackLoading,
+                setTrackLoading,
+                accountInfo,
+                setAccountInfo,
+                stopUseGeoLocation,
+                setStopUseGeoLocation,
+                configureMapState,
+                setConfigureMapState,
+                zoomToFavGroup,
+                setZoomToFavGroup,
+                updateMarkers,
+                setUpdateMarkers,
+                processingGroups,
+                setProcessingGroups,
+                selectedSort,
+                setSelectedSort,
+                visibleTracks,
+                setVisibleTracks,
+                forecastLoading,
+                setForecastLoading,
+                renderingType,
+                setRenderingType,
+                mapBbox,
+                setMapBbox,
+                wikiPlaces,
+                setWikiPlaces,
+                searchSettings,
+                setSearchSettings,
+                loadingContextItem,
+                setLoadingContextItem,
+                selectedPoiId,
+                setSelectedPoiId,
+                openMenu,
+                setOpenMenu,
+                openContextMenu,
+                setOpenContextMenu,
+                prevPageUrl,
+                setPrevPageUrl,
+                pageParams,
+                setPageParams,
+                photoGallery,
+                setPhotoGallery,
+                selectedPhotoInd,
+                setSelectedPhotoInd,
+                openVisibleMenu,
+                setOpenVisibleMenu,
+                cloudSettings,
+                setCloudSettings,
+                categoryIcons,
+                setCategoryIcons,
+                searchResult,
+                setSearchResult,
+                zoomToMapObj,
+                setZoomToMapObj,
+                processingSearch,
+                setProcessingSearch,
+                searchTooltipRef,
+                searchPointerRef,
+                openLoginMenu,
+                setOpenLoginMenu,
+                loginState,
+                setLoginState,
+                loginError,
+                setLoginError,
             }}
         >
             {props.children}

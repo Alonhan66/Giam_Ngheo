@@ -2,36 +2,58 @@
 sidebar_position: 4
 ---
 
-# Android 4.5 (July 2023)
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import AndroidStore from '@site/src/components/buttons/AndroidStore.mdx';
+import AppleStore from '@site/src/components/buttons/AppleStore.mdx';
+import LinksTelegram from '@site/src/components/_linksTelegram.mdx';
+import LinksSocial from '@site/src/components/_linksSocialNetworks.mdx';
+import Translate from '@site/src/components/Translate.js';
+import InfoIncompleteArticle from '@site/src/components/_infoIncompleteArticle.mdx';
+import ProFeature from '@site/src/components/buttons/ProFeature.mdx';
+import InfoAndroidOnly from '@site/src/components/_infoAndroidOnly.mdx';  
 
-OsmAnd produces multiple Ready-To-Use builds every day, allowing you to track new features and participate in the OsmAnd contributions (translation process).
 
-## Join Beta
-You can participate in testing the OsmAnd beta build through Google Play. 
+# Android 4.9 (beta)
+
+Android 4.8 is the latest release that introduces many new features and improvements to the OsmAnd app. This article describes all the key updates that represent meaningful changes for our users.
+
+# Join Beta
+
+OsmAnd releases several Ready-To-Use builds daily, allowing you to track new features and participate in the OsmAnd translation process. You can take part in testing the beta version of OsmAnd using Google Play.
 
 <div class="button-row">
   <a class="button button--active" href="https://play.google.com/apps/testing/net.osmand.plus">OsmAnd+</a>
   <a class="button button--active" href="https://play.google.com/apps/testing/net.osmand">OsmAnd</a>
-</div>
+</div>  
 
-## What's new
+<br/>
 
-* BLE/ANT+ sensors: reworked connection, writing and viewing received data to GPX.
-* Free backup for favorites and settings to OsmAnd Cloud.
-* New format for Terrain maps with 3D Relief support.
-* Tracks management: updated UI, added sorting, support of nested folders.
-* Android Auto: new start menu for access favorites, tracks and poi categories.
-* One list of widgets for Top/Bottom panel.
-* New "Train" profile, allows to calculate railways routes.
-* Contour lines works with any "Map source".
-* Expanded list of default actions for external keyboards.
-* Custom routing files, added options to delete or overwrite.
-* Added option to "Announce deviation from the route".
-* Start screen: added option restore OsmAnd state from file.
-* Added Hazardous Materials classes for North America.
-* Added support of "Via ferrata" for pedestrian routing.
-* Added "CAI" scale for difficulty classification of the routes.
-* Fixed per-app language selection.
-* Added support themed icons.
-* OsmAnd Cloud: added option to delete account.
-* Accessibility: touch target size for all buttons changed to 48 dp fixed issue with map UI that was visible for screen readers.
+# What's new
+
+- [Context menu for widgets](#widget-context-menu).
+- [4.8 issue Key “D”, “N”, “S” doesn't work on external Keyboards is fixed](https://github.com/osmandapp/OsmAnd/issues/20636).
+- Buttons Control on map ([Allow to change size, shape, icon for map buttons](https://github.com/osmandapp/OsmAnd-Issues/issues/2437)).
+- Gallery / Places - Explore ([images on the map](https://osmand.net/docs/versions/future-web#explore-map-menu)).
+
+<!-- 
+- [Activities](https://github.com/osmandapp/OsmAnd/issues/17997) for GPX track data.
+- [Autosync](https://github.com/osmandapp/OsmAnd/issues/18212) OsmAnd Cloud.
+- [Smartwatch](https://github.com/osmandapp/OsmAnd/issues/9258).
+- Created quick actions to represent 'Map rotate'
+- Default buttons – Appearance.
+- Main navigation widgets.
+- Search (USA address).
+- Nautical maps (new data).
+- Traffic (Germany and Netherlands).
+- Geographic grid.
+-->
+
+
+## Widget Context Menu
+
+![Widget context menu](@site/static/img/widgets/widget_context_menu_andr.png)
+
+The [**widget context menu**](../user/widgets/configure-screen.md#panel-widgets-settings) allows you to manage and configure widgets directly from the map screen, providing *a quick way to organize panels*. You can access this menu by ***long tapping*** on any widget to customize the layout of widgets without leaving the map.
+
+

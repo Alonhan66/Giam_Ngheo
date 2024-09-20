@@ -1,28 +1,17 @@
 import { makeStyles } from '@material-ui/core/styles';
 
 const wptTabStyle = makeStyles({
-    icon: {
+    iconGroup: {
+        // center icon
         '& .icon': {
-            top: '22px',
-            left: '20px',
+            left: 10,
+            top: 25,
         },
+        // center background / remove shadow
         '& .background': {
-            marginBottom: '-40px',
-            marginRight: '20px',
-            marginLeft: '10px',
             filter: 'drop-shadow(0 0 0 gray)',
-        },
-    },
-    iconOnlyName: {
-        '& .icon': {
-            top: '16px',
-            left: '20px',
-        },
-        '& .background': {
-            marginBottom: '-40px',
-            marginRight: '20px',
-            marginLeft: '10px',
-            filter: 'drop-shadow(0 0 0 gray)',
+            left: -12,
+            top: 4,
         },
     },
     text: {

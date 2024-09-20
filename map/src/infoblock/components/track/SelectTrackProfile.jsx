@@ -2,7 +2,7 @@ import { FormControl, InputLabel, MenuItem, IconButton, Select, Box } from '@mui
 import { Settings } from '@mui/icons-material';
 import { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import RouteProfileSettingsDialog from '../../../drawer/components/route/RouteProfileSettingsDialog';
+import RouteProfileSettings from '../../../menu/route/RouteProfileSettings';
 
 const useStyles = makeStyles({
     grid: {
@@ -23,11 +23,10 @@ export default function SelectTrackProfile({ geoRouter, label, hideSettings = fa
     return (
         <>
             {openSettings && (
-                <RouteProfileSettingsDialog
+                <RouteProfileSettings
                     key="trackroutesettingsdialog"
                     geoRouter={geoRouter}
                     setOpenSettings={setOpenSettings}
-                    useDev={true}
                 />
             )}
             <MenuItem className={classes.grid} key="trackrouteprofile" sx={{ ml: 1, mr: 2, mt: 1 }}>

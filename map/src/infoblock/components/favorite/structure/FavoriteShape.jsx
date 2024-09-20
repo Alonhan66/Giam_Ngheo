@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
 import favoriteEditMenuStyles from '../../../styles/FavoriteEditMenuStyles';
-import FavoritesManager from '../../../../context/FavoritesManager';
+import FavoritesManager from '../../../../manager/FavoritesManager';
 
 export default function FavoriteShape({ color, favoriteShape, setFavoriteShape, defaultBackground }) {
     const favoriteStyles = favoriteEditMenuStyles();
@@ -17,10 +17,8 @@ export default function FavoriteShape({ color, favoriteShape, setFavoriteShape, 
                 </Typography>
             </ListItemText>
             <Box
-                component="div"
                 sx={{
                     display: 'flex',
-                    overflow: 'hidden',
                 }}
             >
                 {Object.entries(shapesSvg).map((shape, index) => {

@@ -1,9 +1,9 @@
 import { ClickAwayListener, Grid, IconButton, MenuItem, MenuList, Paper, Popper } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
-import TracksManager from '../../context/TracksManager';
+import TracksManager from '../../manager/track/TracksManager';
 import AppContext from '../../context/AppContext';
 import { makeStyles } from '@material-ui/core/styles';
-import PointManager from '../../context/PointManager';
+import PointManager from '../../manager/PointManager';
 import { Close } from '@mui/icons-material';
 import _ from 'lodash';
 
@@ -123,12 +123,15 @@ export default function PointContextMenu({ anchorEl }) {
     }
 
     function split(ind, nextInd) {
-        ctx.selectedGpxFile.points[nextInd].geometry = [];
-        ctx.selectedGpxFile.points[ind].geometry[ctx.selectedGpxFile.points[ind].geometry.length - 1].profile =
-            TracksManager.PROFILE_GAP;
+        const geometryLength = ctx.selectedGpxFile.points[ind].geometry.length;
+        ctx.selectedGpxFile.points[ind].geometry[geometryLength - 1].profile = TracksManager.PROFILE_GAP;
         ctx.selectedGpxFile.points[ind].profile = TracksManager.PROFILE_GAP;
+
+        ctx.selectedGpxFile.points[nextInd].geometry = [];
+
         ctx.selectedGpxFile.updateLayers = true;
         ctx.setSelectedGpxFile({ ...ctx.selectedGpxFile });
+
         ctx.trackState.update = true;
         ctx.setTrackState({ ...ctx.trackState });
     }
@@ -138,7 +141,6 @@ export default function PointContextMenu({ anchorEl }) {
         point1.profile = point2.profile;
         point1.geoProfile = point2.geoProfile;
         delete point1.geometry[point1.geometry.length - 1].profile;
-        delete point1.geometry[point1.geometry.length - 1].geoProfile;
         ctx.selectedGpxFile.updateLayers = true;
         ctx.setSelectedGpxFile({ ...ctx.selectedGpxFile });
         ctx.trackState.update = true;
@@ -215,7 +217,8 @@ export default function PointContextMenu({ anchorEl }) {
         );
     };
 
-    const handleClose = () => {
+    const handleClose = (event) => {
+        event.preventDefault();
         closeContextMenu();
         if (anchorEl) {
             return;
@@ -226,16 +229,7 @@ export default function PointContextMenu({ anchorEl }) {
     return (
         <>
             {pointInd !== -1 && (
-                <Popper
-                    open={anchorEl !== undefined}
-                    anchorEl={anchorEl}
-                    transition
-                    style={{
-                        zIndex: 1000,
-                        left: ctx.pointContextMenu?.left + 330,
-                        top: ctx.pointContextMenu?.top + 50,
-                    }}
-                >
+                <Popper open={!!anchorEl} anchorEl={anchorEl}>
                     <ClickAwayListener onClickAway={handleClose}>
                         <Grid container spacing={2}>
                             <Grid item xs={10}>

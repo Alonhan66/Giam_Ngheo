@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 17
 title:  Wikipedia
 ---
 
@@ -14,18 +14,19 @@ import Translate from '@site/src/components/Translate.js';
 import InfoIncompleteArticle from '@site/src/components/_infoIncompleteArticle.mdx';
 import ProFeature from '@site/src/components/buttons/ProFeature.mdx';
 
+
+## Overview
+
 :::tip NOTE
 The Wikipedia plugin is a paid feature of the OsmAnd app.  
 :::
 
 Having Wikipedia on your trip helps you learn more about the places you visit. It is available offline and shows Wikipedia articles in relation to the points of interest right on the map.  
 
-## Overview 
-
-The Wikipedia plugin is a separate feature that can be enabled/disabled as needed. Once enabled, it allows you to upload Wikipedia data [downloaded](../personal/maps.md#download-maps-maps) for each geographical region. The map has two kinds of uploaded knowledge from Wikipedia: a brief information and a full article.  
+The Wikipedia plugin is a separate feature that can be enabled/disabled as needed. Once enabled, it allows you to upload Wikipedia data [downloaded](../personal/maps-resources.md#download-maps-maps) for each geographical region. The map has two kinds of uploaded knowledge from Wikipedia: a brief information and a full article.  
 
 
-Brief information is provided by Wikipedia POIs (an abbreviation for "[point of interest](../map/point-layers-on-map.md)"). If the Wikipedia option is toggled on in the menu, a Wikipedia POI appears on the map. When you tap on a point of interest, it expands to provide brief information from Wikipedia, as well as the ability to open a full article. The Wikipedia POI, as well as related articles, are available offline. You can read them as needed, switch languages, and search for other information on Wikipedia.  
+Brief information is provided by Wikipedia POIs (an abbreviation for "[point of interest](../map/point-layers-on-map.md)"). If the Wikipedia option is toggled on in the menu, a Wikipedia POI appears on the map. When you tap a point of interest, it expands to provide brief information from Wikipedia, as well as the ability to open a full article. The Wikipedia POI, as well as related articles, are available offline. You can read them as needed, switch languages, and search for other information on Wikipedia.  
 
 
 [Wikipedia](https://en.wikipedia.org/wiki/Wikipedia) is a free, multilingual open-collaborative online encyclopedia created and maintained by a community of volunteer editors using a wiki-based editing system.  
@@ -55,7 +56,7 @@ To download the Wikipedia data for a region, go to the [available packages for d
 <TabItem value="android" label="Android">
 
 In the **Android** version, you can open Wikipedia data to download by region as follows:  
-1. Go to: *<Translate android="true" ids="shared_string_menu,welmode_download_maps,regions"/>*   
+1. Go to: *<Translate android="true" ids="shared_string_menu,maps_and_resources,regions"/>*   
 2. Select the required region. Once the region is opened, the Wikipedia data will be among other packages.   
  
 To see what data has already been uploaded, go to: *<Translate android="true" ids="shared_string_menu,download_tab_local,download_wikipedia_maps"/>*  

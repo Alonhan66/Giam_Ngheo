@@ -1,6 +1,6 @@
 ---
 sidebar_position: 4
-title:  Track recording
+title:  Track Recording
 ---
 
 import Tabs from '@theme/Tabs';
@@ -14,15 +14,15 @@ import Translate from '@site/src/components/Translate.js';
 
 Common issues with track recording: Noise, gaps, and inaccuracies.
 
-This article addresses issues with GPX track recording which have been observed over time in different Android versions. **'Background'** means to simply refer to the OsmAnd app not being displayed in the foreground, in particular when the device screen is off (which is different from the Android-internal definition of 'background').
+This article addresses issues with GPX track recording which have been observed over time in different Android versions. **Background** means to simply refer to the OsmAnd app not being displayed in the foreground, in particular when the device screen is off (which is different from the Android-internal definition of *background*).
 
-**Note**: Since Android 11 (2020/12) there is no more system permission option "Always allow" to use location access in the background, but this **does not limit** OsmAnd's background track recording: According to Google's documentation it is now considered **foreground usage**, as internally the foreground service permission is now used and a system notification about a track being recorded is always visible.
+**Note**: Since Android 11 (2020/12) there is no more system permission option *Always allow* to use location access in the background, but this **does not limit** OsmAnd's background track recording: According to Google's documentation it is now considered **foreground usage**, as internally the foreground service permission is now used and a system notification about a track being recorded is always visible.
 
 Pleae note that it's simply the new Android wording which can be misleading:
 
-**"Allow while using the app"** means that the app can permanently obtain the location as long as the app is either displayed on the screen itself or has a visible notification in the Android notification bar, like OsmAnd has during navigation or trip recording. (This is technically referred to as "foreground mode".)
+**Allow while using the app** means that the app can permanently obtain the location as long as the app is either displayed on the screen itself or has a visible notification in the Android notification bar, like OsmAnd has during navigation or trip recording. (This is technically referred to as *foreground mode*.)
 
-**"Allow all the time"**, on the other hand, means that an app can in principle obtain your location 'unnotoiced' without any of these conditions applying. But Android limits the frequency of location access in this ("background") mode to something like once per hour, certainly not the correct mode for a navigtion app.
+**Allow all the time**, on the other hand, means that an app can in principle obtain your location 'unnoticed' without any of these conditions applying. But Android limits the frequency of location access in this (*background*) mode to something like once per hour, certainly not the correct mode for a navigation app.
 
 
 ## Recorded tracks are noisy
@@ -69,16 +69,16 @@ You can read more information [here](https://developer.apple.com/library/archive
 ### Tested Power Settings for Android 9, 10, and 11 (Hardy, 2020-08-25)
 
 I have successfully tested the following Power settings under Android 9, 10, and later 11 (on Samsung devices) for OsmAnd to log gapless tracks. Please locate these **10 settings** and set accordingly:
-* (1) **Power (saving) mode** = OFF   (called 'Optimized' in Android 10)
-* (2) **Adaptive power saving** = OFF   (leaving ON may periodically use Medium power saving which inhibits OsmAnd logging.)
-* (3) **Adaptive battery** = ON   (candidate for 'OFF', but no problem detected so far)
-* (4) **Put unused apps to sleep** = OFF   (check list of sleeping apps)
-* (5) **Auto disable unused apps** = OFF   (seems not to exist anymore in Android 10)
+* (1) **Power saving (mode)** = OFF   (or 'Optimized' in Android 10)
+* (2) **Adaptive power saving** = OFF   (ON may at times activate Medium power saving which prevents OsmAnd logging)
+* (3) **Adaptive battery** = ON   (should not affect apps exempted from battery optimization anyway, see (9) below)
+* (4) **Put unused apps to sleep** = OFF   (ON probably also ok if OsmAnd is exempted from battery optimization, see (9) below)
+* (5) **Auto disable unused apps** = OFF   (seems only present in Android 9)
 * (6) **Optimize settings** = OFF   (in Android 10 under "_Device care / Advanced_", in Android 11 seems gone)
-* (7) **Auto optimize (daily)** = ON
-* (8) **Auto restart (at set times)** = OFF
-* (9) **Optimize Battery Usage** (under "_Apps / OsmAnd / Battery_" or "_Apps / 3-dots / Special access / Optimize battery usage / All / OsmAnd_") = May leave all unchanged (looks like OsmAnd does not need to have Battery optimization disabled here)
-* (10) In the same place and for Android 11, make sure **Allow background activity** = ON for OsmAnd.
+* (7) **Auto optimize (daily)** = ON   (probably not relevant)
+* (8) **Auto restart (at set times)** = OFF   (probably not relevant)
+* (9) **Optimize Battery Usage** (under "_Apps / OsmAnd / Battery_" or "_Apps / 3-dots / Special access / Optimize battery usage / All / OsmAnd_") = advisable to exempt OsmAnd from battery optimization (although not necessary on all devices)
+* (10) **Allow background activity** = ON for OsmAnd under "_Apps / OsmAnd / Battery_" for Android 11
 
 Some of these settings interact, so be accurate. Best search for the above settings by name (with and without the expressions in parentheses). Depending on your version of Android, they may be scattered over these various _Android Settings screens_:
 * _Device care_

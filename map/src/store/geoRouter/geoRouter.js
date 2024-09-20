@@ -3,12 +3,19 @@ import { calculateGpxRoute } from './legacy/calculateGpxRoute.js';
 import { updateRouteBetweenPoints } from './legacy/updateRouteBetweenPoints.js';
 
 import { loadProviders } from './methods/loadProviders.js';
-import { newInterPoint } from './methods/newInterPoint.js';
 import { pickTypeRouterProfile } from './methods/pickTypeRouterProfile.js';
 
 import { initSetter, nextState, flushState } from './state.js';
 
-import { onOpenSettings, onCloseSettings, onDragStart, onDragEnd, onParamsChanged, onGeoProfile } from './events.js';
+import {
+    onOpenSettings,
+    onCloseSettings,
+    onDragStart,
+    onDragEnd,
+    onParamsChanged,
+    onGeoProfile,
+    escapeFromLineProfile,
+} from './events.js';
 
 import {
     isReady,
@@ -45,7 +52,6 @@ export class geoRouter {
     // state
     setter = null;
     loaded = false;
-    paused = false;
     preview = false;
 
     // current
@@ -80,10 +86,10 @@ export class geoRouter {
     onParamsChanged = onParamsChanged;
     onGeoProfile = onGeoProfile;
     onRouterProfileSelected = onGeoProfile; // alias
+    escapeFromLineProfile = escapeFromLineProfile;
 
     // methods()
     loadProviders = loadProviders;
-    newInterPoint = newInterPoint;
     pickTypeRouterProfile = pickTypeRouterProfile;
 
     // legacy()

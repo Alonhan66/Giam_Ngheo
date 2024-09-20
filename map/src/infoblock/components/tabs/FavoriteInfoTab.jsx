@@ -3,33 +3,18 @@ import { Folder, LocationOn } from '@mui/icons-material';
 import React, { useContext, useEffect, useState } from 'react';
 import contextMenuStyles from '../../styles/ContextMenuStyles';
 import AppContext from '../../../context/AppContext';
-import MarkerOptions from '../../../map/markers/MarkerOptions';
-import { makeStyles } from '@material-ui/core/styles';
-import EditFavoriteDialog from '../favorite/EditFavoriteDialog';
-import DeleteFavoriteDialog from '../favorite/DeleteFavoriteDialog';
-import FavoritesManager from '../../../context/FavoritesManager';
+import { createPoiIcon, removeShadowFromIconWpt } from '../../../map/markers/MarkerOptions';
+import EditWptDialog from '../../../dialogs/favorites/EditWptDialog';
+import DeleteWptDialog from '../../../dialogs/favorites/DeleteWptDialog';
+import FavoritesManager, {
+    isNoValue,
+    prepareBackground,
+    prepareColor,
+    prepareIcon,
+} from '../../../manager/FavoritesManager';
 
-const useStyles = makeStyles({
-    icon: {
-        '& .icon': {
-            width: '40px',
-            height: '40px',
-            top: '20px',
-            left: '21px',
-        },
-        '& .background': {
-            left: '-25px',
-            top: '-25px',
-            width: '100px',
-            height: '100px',
-            filter: 'drop-shadow(0 0 0 gray)',
-        },
-    },
-});
-
-const FavoriteInfoTab = ({ width }) => {
+const FavoriteInfoTab = () => {
     const styles = contextMenuStyles();
-    const classes = useStyles();
     const ctx = useContext(AppContext);
 
     const toggleEditFavoritesDialogOpen = () => {
@@ -70,24 +55,8 @@ const FavoriteInfoTab = ({ width }) => {
         }
     }, [ctx.selectedGpxFile]);
 
-    function isNoValue(value) {
-        return value === undefined || value === 'null' || value === null;
-    }
-
-    function prepareColor(value) {
-        return isNoValue(value) ? MarkerOptions.DEFAULT_WPT_COLOR : value;
-    }
-
-    function prepareBackground(value) {
-        return isNoValue(value) ? MarkerOptions.BACKGROUND_WPT_SHAPE_CIRCLE : value;
-    }
-
-    function prepareIcon(value) {
-        return isNoValue(value) ? MarkerOptions.DEFAULT_WPT_ICON : value;
-    }
-
     return (
-        <Box className={styles.item} maxWidth={width}>
+        <Box id={'se-fav-item-info-' + favorite.name} className={styles.item} maxWidth={ctx.infoBlockWidth}>
             <Typography className={styles.info} variant="subtitle1" color="inherit">
                 <Grid container spacing={2}>
                     <Grid className={styles.name} item xs={10}>
@@ -98,21 +67,23 @@ const FavoriteInfoTab = ({ width }) => {
                     {favorite?.marker && (
                         <Grid sx={{ position: 'relative' }} className={styles.name} item xs={2}>
                             <div
-                                className={classes.icon}
                                 dangerouslySetInnerHTML={{
                                     __html:
-                                        MarkerOptions.getWptIcon(
-                                            favorite?.marker,
-                                            favorite?.color,
-                                            favorite?.background,
-                                            favorite?.icon
-                                        ).options.html + '',
+                                        removeShadowFromIconWpt(
+                                            createPoiIcon({
+                                                point: favorite?.marker,
+                                                color: favorite?.color,
+                                                background: favorite?.background,
+                                                hasBackgroundLight: false,
+                                                icon: favorite?.icon,
+                                            }).options.html
+                                        ) + '',
                                 }}
                             />
                         </Grid>
                     )}
                 </Grid>
-                <Grid container sx={{ mt: -9 }}>
+                <Grid container>
                     <ListItemIcon
                         style={{
                             color: favorite.category && FavoritesManager.getColorGroup(ctx, favorite.category, false),
@@ -132,7 +103,7 @@ const FavoriteInfoTab = ({ width }) => {
                             {descriptionOpen ? favorite.desc : favorite.desc.substring(0, 140)}
                             {favorite.desc.length > 70 && (
                                 <ListItemIcon onClick={toggleDescriptionOpen}>
-                                    {descriptionOpen ? '...less' : '...more'}
+                                    {descriptionOpen ? ' ...less' : ' ...more'}
                                 </ListItemIcon>
                             )}
                         </Typography>
@@ -161,8 +132,8 @@ const FavoriteInfoTab = ({ width }) => {
                 Edit
             </Button>
             {editFavoritesDialogOpen && (
-                <EditFavoriteDialog
-                    favorite={favorite}
+                <EditWptDialog
+                    wpt={favorite}
                     editFavoritesDialogOpen={editFavoritesDialogOpen}
                     setEditFavoritesDialogOpen={setEditFavoritesDialogOpen}
                     deleteFavoritesDialogOpen={deleteFavoritesDialogOpen}
@@ -179,10 +150,7 @@ const FavoriteInfoTab = ({ width }) => {
                 Delete
             </Button>
             {deleteFavoritesDialogOpen && (
-                <DeleteFavoriteDialog
-                    dialogOpen={deleteFavoritesDialogOpen}
-                    setDialogOpen={setDeleteFavoritesDialogOpen}
-                />
+                <DeleteWptDialog dialogOpen={deleteFavoritesDialogOpen} setDialogOpen={setDeleteFavoritesDialogOpen} />
             )}
         </Box>
     );

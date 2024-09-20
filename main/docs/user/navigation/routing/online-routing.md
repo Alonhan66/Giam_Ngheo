@@ -13,9 +13,10 @@ import Translate from '@site/src/components/Translate.js';
 import InfoIncompleteArticle from '@site/src/components/_infoIncompleteArticle.mdx';
 import InfoAndroidOnly from '@site/src/components/_infoAndroidOnly.mdx';
 
-<InfoIncompleteArticle/>
 
 <InfoAndroidOnly />
+
+> *This article was last updated in June 2024*
 
 ## Overview
 
@@ -34,7 +35,7 @@ Online routing types are designed for *Driving, Cycling, and Walking* profiles, 
 ### Custom Online routing
 
 In addition to the preset online routing types, you can configure other online routing mechanisms.  
-Tap on the **+ Add online routing engine** button and choose one of the proposed online routing types ([Graphhopper](https://graphhopper.com/), [OSRM](http://project-osrm.org/), [Openrouteservice](https://openrouteservice.org)). Select the appropriate vehicle and tap *test routing* before saving your changes.  
+Tap the **+ Add online routing engine** button and choose one of the proposed online routing types ([Graphhopper](https://graphhopper.com/), [OSRM](http://project-osrm.org/), [Openrouteservice](https://openrouteservice.org)). Select the appropriate vehicle and tap *test routing* before saving your changes.  
 
 ![Custom online routing Android](@site/static/img/navigation/routing/custom_online_routing_andr_1.png) ![Custom online routing Android](@site/static/img/navigation/routing/custom_online_routing_andr_2.png)  
 
@@ -42,8 +43,16 @@ Tap on the **+ Add online routing engine** button and choose one of the proposed
 You can read about the differences between online routing engines in [OSMwiki](https://wiki.openstreetmap.org/wiki/Routing/online_routers).
 :::
 
-#### Custom Online GPX routing
+### Custom Online GPX routing
 
 Online server builds a route using your starting point and destination. After receiving the track from the server, OsmaAnd creates a route using *[Attach to the road's](../setup/gpx-navigation.md#attach-to-roads)* function. So all needed routing information will be taken from our offline maps, and more precise guidance along the route will be provided.  
 
 ![Custom GPX routing Android 1](@site/static/img/navigation/routing/online_routing_gpx_1.png) ![Custom GPX routing Android 1](@site/static/img/navigation/routing/online_routing_gpx_2.png)
+
+## Online routing setting
+
+When online routing is selected for navigation, an additional option appears in the settings.
+
+![Settings Online routing Android](@site/static/img/navigation/routing/settings_online_routing_1.png)
+
+- *<Translate android="true" ids="calculate_osmand_route_without_internet"/>*  - allows to use OsmAnd offline routing, when online routing is selected in the navigation settings. This option may help if a route has already been built online, but then there was a deviation from the route and at the same time the internet connection was lost. In this case, offline routing will be used to return to the route, previousely calculated online.

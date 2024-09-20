@@ -15,7 +15,78 @@ You can get the latest version of OsmAnd free from listed app stores.
 <hr></hr>
 
 Direct links to free OsmAnd versions.
+
 ## Version 4 
+
+### Version 4.8
+Release date: 08/2024
+* New terrain colorization option "Altitude"
+* Custom color palettes for terrain, tracks, and routes.
+* 3D variant for location position icons
+* Quick Actions can now be assigned to external keyboards
+* Weather: UI refresh, added wind animation
+* 3D Track Improvements: new visualization and colorization options
+* Expanded selection of tourist routes on the map
+* Added app theme option to follow map mode
+* Fixed track stats, sorting & search
+* OSM Editing: deleted login / password authorization method
+* Switching to system share sheet starting Android 14
+
+<DownloadRelease blog="osmand-android-4-8-released" release="net.osmand-4.8.6.apk" />
+
+### Version 4.7
+Release date: 04/2024
+* New "Speedometer" widget compatible with Android Auto
+* Configure the map screen by adding multiple "Quick Action" buttons
+* Improved readability of data in graphs
+* Improved appearance customization for group of tracks
+* Added filters by sensor data for tracks
+* Added support for additional GPX tags
+* Customize "Distance during navigation": choose between precise or round up numbers
+* Unified UI for track selection 
+* OpenStreetMap login switched to OAuth 2.0
+
+<DownloadRelease blog="osmand-android-4-7-released" release="net.osmand-4.7.10.apk" />
+
+### Version 4.6 
+Release date: 12/2023
+* Android Auto: Added 3D mode and enhanced search screen
+* Tracks: Introduced filters and smart folders, optimized memory for larger files
+* Enhanced top and bottom widget panels to accommodate all widgets
+* Improved local resource management
+* Customizable button mapping for external controllers
+* New widgets: "Glide Ratio" and "Sun Position"
+* OsmAnd Cloud: Now access deleted files
+* Enhanced track coloring in Slope mode with new symmetric gradient
+* Resolved issues with transparent status bar
+* Added support for ANT+ temperature widget
+* Introduced "Available RAM" widget
+
+<DownloadRelease blog="osmand-android-4-6-released" release="net.osmand-4.6.13.apk" />
+
+### Version 4.5 
+Release date: 08/2023
+* BLE/ANT+ sensors: reworked connection, writing and viewing received data to GPX
+* Free backup for favorites and settings to OsmAnd Cloud
+* New format for Terrain maps with 3D Relief support
+* Tracks management: updated UI, added sorting, support of nested folders
+* Android Auto: new start menu for access favorites, tracks and poi categories
+* One list of widgets for Top/Bottom panel
+* New "Train" profile, allows to calculate railways routes
+* Contour lines works with any "Map source"
+* Expanded list of default actions for external keyboards
+* Custom routing files, added options to delete or overwrite
+* Added option to "Announce deviation from the route"
+* Start screen: added option restore OsmAnd state from file
+* Added "Hazardous Materials" classes Truck navigation in North America
+* Added support of "Via ferrata" for pedestrian routing
+* Added "CAI" scale for difficulty classification of the routes
+* Fixed per-app language selection
+* Added support for themed icons
+* OsmAnd Cloud: added option to delete account
+* Accessibility: touch target size for  buttons changed to 48 dp; fixed issue with map UI visible for screen readers
+
+<DownloadRelease blog="osmand-android-4-5-released" release="net.osmand-4.5.10.apk" />
 
 ### Version 4.4 
 Release date: 03/2023
@@ -58,7 +129,7 @@ Release date: 12/2022
 Release date: 06/2022
 
 * Widgets redesign: new Look &  Feel, group by Pages, change order and combine as you  want.
-* Hiking / Cycling / Travel routes: tap on the route symbol and get full information about the route.
+* Hiking / Cycling / Travel routes: tap the route symbol and get full information about the route.
 * Favorite groups: set default appearance for new points in the group
 * Fixes: online tile-maps auto-update
 
@@ -352,7 +423,7 @@ Release date: 03/2016
 * Completely new map markers interface
 * Reworked route preparation menu
 * Highway shields designed by country
-* Reverse geocoding showing the address of a location by tap on the map
+* Reverse geocoding showing the address of a location by tap the map
 * Better transport information
 
 <DownloadRelease blog="osmand-2-3" release="net.osmand-2.3.apk" />

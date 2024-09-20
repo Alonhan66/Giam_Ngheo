@@ -12,8 +12,6 @@ import LinksSocial from '@site/src/components/_linksSocialNetworks.mdx';
 import Translate from '@site/src/components/Translate.js';
 import InfoIncompleteArticle from '@site/src/components/_infoIncompleteArticle.mdx';
 
-<InfoIncompleteArticle/>
-
 General issues related to various OsmAnd's features
 
 ## Battery consumption
@@ -43,10 +41,12 @@ OsmAnd Function | Battery Consumption <br /> per Hour
 
 
 ## Privacy
+
 Privacy related issues (delete history / check internet usage / permissions).
 
 ### How to delete search history
-To remove search history, please open the Search menu, make a long tap on any search result and select which results to delete. You can also enable the select all option in the upper-left corner of the screen to remove all of the search results. After that, please press the Trash icon in the upper-right corner of the screen.
+
+To remove search history, please open the Search menu, make a long tap any search result and select which results to delete. You can also enable the select all option in the upper-left corner of the screen to remove all of the search results. After that, please press the Trash icon in the upper-right corner of the screen.
 
 You can also follow [this guide](../search/index.md) to learn more about the search in OsmAnd.
 

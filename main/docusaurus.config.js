@@ -24,6 +24,7 @@ const config = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/osmandapp/web/edit/main/main/',
+          sidebarItemsGenerator: require('./scripts/help-structure-generator.js'),
         },
         blog: {
           showReadingTime: true,
@@ -34,12 +35,10 @@ const config = {
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
-
       }),
     ],
   ],
   plugins: [require.resolve('docusaurus-lunr-search')],
-
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -58,8 +57,8 @@ const config = {
           },
           { to: '/blog', label: 'Blog', position: 'left'},
           { to: '/docs/user/purchases', label: '💳 Purchases', position: 'left' },
+          { to: 'pathname:///map', target: '_self', label: '🌍 Map', position: 'left' },
           { to: '/docs/hiring', label: '🚵‍♂️ Join us', position: 'left' },
-//          { href: 'https://osmand.net/map', label: 'Map', position: 'left' },
           {
             href: 'https://github.com/osmandapp/',
             label: 'GitHub',
@@ -78,6 +77,11 @@ const config = {
                 to: '/docs/user/purchases',
               },
               {
+                label: 'Map 🌍',
+                to: 'pathname:///map',
+                target: '_self',
+              },
+              {
                 label: 'Docs',
                 to: '/docs/intro',
               },
@@ -93,7 +97,7 @@ const config = {
                 label: 'Build it',
                 to: '/docs/build-it',
               },
-              
+
               {
                 label: 'Giveaway',
                 to: '/giveaway',
@@ -130,7 +134,7 @@ const config = {
               {
                 label: 'Matrix',
                 href: 'https://matrix.to/#/#osmand:hacklab.fi',
-              }, 
+              },
             ],
           },
           {
@@ -161,12 +165,12 @@ const config = {
                 href: 'https://t.me/osmand_pl',
               },
               {
-                label: 'Russian',
-                href: 'https://t.me/ruosmand',
-              },
-              {
                 label: 'Spanish',
                 href: 'https://t.me/osmand_es',
+              },
+              {
+                label: 'Brazilian',
+                href: 'https://t.me/brosmand',
               },
               {
                 label: 'Arabic',
@@ -175,7 +179,7 @@ const config = {
               {
                 label: 'Türkçe',
                 href: 'https://t.me/OsmAndTR',
-              },                
+              },
             ],
           },
           {
@@ -184,10 +188,6 @@ const config = {
               {
                 label: 'Blog',
                 to: '/blog',
-              },
-              {
-                label: 'Map',
-                to: 'https://osmand.net/map',
               },
               {
                 label: 'GitHub',
@@ -199,11 +199,11 @@ const config = {
               },
               {
                 label: 'Get OsmAnd Merchandise',
-                href: 'https://www.redbubble.com/people/osmand/works/26426633-osmand',
+                href: 'https://www.redbubble.com/shop/ap/36789864',
               },
               {
-                label: 'support@osmand.net',
-                href: 'mailto:support@osmand.net'
+                label: 'Support',
+                href: '/help-online/support'
               },
             ],
           },

@@ -25,3 +25,10 @@ yarn-error.log*
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+/src/resources/generated/*
+
+/src/resources/translations/*
+!/src/resources/translations/gen-translations-config.json
+!/src/resources/translations/en/
+!/src/resources/translations/supportedLanguages.json

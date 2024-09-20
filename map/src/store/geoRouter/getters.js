@@ -1,20 +1,18 @@
 import { copyObj } from '../../util/Utils';
 import LinearScaleIcon from '@mui/icons-material/LinearScale';
 import BusAlertIcon from '@mui/icons-material/BusAlert';
-import TracksManager from '../../context/TracksManager';
+import TracksManager from '../../manager/track/TracksManager';
 
 const PROFILE_LINE = TracksManager.PROFILE_LINE;
 
 /**
  * Return this Router status:
  * loaded: all providers loaded.
- * paused: pause route calculate.
  * Add it to Effect deps if you call it inside.
- * @note ignore pause for OSRM and/or Line
  * @return {bool}
  */
 export function isReady() {
-    return this.loaded === true && (this.paused === false || this.type !== 'osmand' || this.profile === PROFILE_LINE);
+    return this.loaded === true;
 }
 
 /**
@@ -38,7 +36,7 @@ export function getEffectDeps() {
  * @return [{ key, name }]
  */
 export function listProviders() {
-    return this.providers.map(({ key, name }) => ({ key, name }));
+    return this.providers.map(({ key, name, type }) => ({ key, name, type }));
 }
 
 /**
@@ -58,7 +56,7 @@ export function getProfile({ type = this.type, router = this.router, profile = t
         type = geoProfile.type ?? type;
         router = geoProfile.router ?? router;
         profile = geoProfile.profile ?? profile;
-        // console.log('getProfile() with geoProfile', geoProfile);
+        // console.debug('getProfile() with geoProfile', geoProfile);
     }
     const r = this.providers.find((r) => r.key === router);
     const p = r?.profiles?.find((p) => p.key === profile);
@@ -108,7 +106,7 @@ export function getChangedParams({ router, profile } = {}) {
 
     if (params && resetParams) {
         Object.keys(params).forEach((k) => {
-            if (params[k].value === resetParams[k].value) {
+            if (resetParams[k] && params[k].value === resetParams[k].value) {
                 delete params[k];
             }
         });
@@ -157,7 +155,16 @@ function getProfileDetails({ p, type, router, profile } = {}) {
     };
 }
 
+const osrmToOsmAndProfiles = {
+    'OSRM-car': 'car',
+    'OSRM-bike': 'bicycle',
+    'OSRM-foot': 'pedestrian',
+};
+
 function getProfileIcon({ color, profile } = {}) {
+    if (osrmToOsmAndProfiles[profile]) {
+        profile = osrmToOsmAndProfiles[profile];
+    }
     if (profile === PROFILE_LINE) {
         return <LinearScaleIcon sx={{ color: color }} fontSize="small" />;
     } else if (profile.includes('rescuetrack')) {

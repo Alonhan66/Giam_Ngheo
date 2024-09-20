@@ -1,6 +1,6 @@
 ---
-sidebar_position: 9
-title:  Public transport
+sidebar_position: 10
+title:  Public Transport
 ---
 
 import Tabs from '@theme/Tabs';
@@ -11,6 +11,9 @@ import LinksTelegram from '@site/src/components/_linksTelegram.mdx';
 import LinksSocial from '@site/src/components/_linksSocialNetworks.mdx';
 import Translate from '@site/src/components/Translate.js';
 
+> *This article was last updated in August 2023.*
+
+## Overview
 
 Public transport is an additional layer that allows you to display transport routes and stops on the map, to check detailed information about them and to navigate.
 
@@ -81,8 +84,10 @@ You can see the full list of stops by clicking <Translate android="true" ids="re
 
 **Note**: If you click <Translate android="true" ids="get_directions"/> button you will get a route from your current location to the selected Public Transport Station.
 
-## Read more
+## Related Articles
 
 - [Vector maps](../map/vector-maps.md) 
 - [Public transport navigation](../navigation/routing/public-transport-navigation.md)
   
+
+## Related Articles

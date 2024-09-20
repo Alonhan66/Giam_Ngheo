@@ -12,11 +12,9 @@ import LinksSocial from '@site/src/components/_linksSocialNetworks.mdx';
 import Translate from '@site/src/components/Translate.js';
 import InfoIncompleteArticle from '@site/src/components/_infoIncompleteArticle.mdx';
 
-<InfoIncompleteArticle/>
-
 ## Overview
 
-*Search History* is a record of all searches and locations that you have entered or searched for in the app over the period of use. This tool allows you to easily find and access previously searched locations, which makes navigation easier and saves your time.   
+*Search History* is a record of all searches and locations that you have entered or searched for in the app over the period of use. This tool allows you to easily find and access previously searched locations, which makes navigation easier and saves your time.
 
 OsmAnd provides several ways to view your search history.  
 
@@ -27,7 +25,7 @@ OsmAnd provides several ways to view your search history.
 - Search history is available in [Android Auto](../navigation/auto-car.md#search) and [CarPlay](../navigation/car-play.md#search).
 
 
-## How to use
+## How to Use
 
 <Tabs groupId="operating-systems">
 
@@ -43,7 +41,7 @@ OsmAnd provides several ways to view your search history.
 
 </TabItem>
 
-</Tabs> 
+</Tabs>
 
 The search history serves to provide relevant information about your previous actions.
 
@@ -53,12 +51,12 @@ The search history serves to provide relevant information about your previous ac
 
 - *Track previous trips*. The search history can be useful for tracking previous trips and routes. You can track routes you have taken before or [plan your next route](../plan-route/create-route.md) based on previous ones.  
 
-- *Search for places over a certain period of time*. For the Android app, you need to use a long press, then find the month in which you made the trip, exit the delete menu and set the name in the search field. For the iOS app, the search history list is already divided into blocks by month.
+- *Search for places over a certain period of time*. For the Android app, you need to use a long tap, then find the month in which you made the trip, exit the delete menu and set the name in the search field. For the iOS app, the search history list is already divided into blocks by month.
 
 - *Delete entries*. Search History provides the ability to [delete](#delete) previous entries, which can be useful for confidentiality or to keep your history organized.
 
 
-### Search query list
+## History Items
 
 <Tabs groupId="operating-systems">
 
@@ -74,28 +72,34 @@ The search history serves to provide relevant information about your previous ac
 
 </TabItem>
 
-</Tabs> 
+</Tabs>
 
-**1.** **Order of items** displayed in the list.  
-- **Recent Items**. The most recent requests or locations are displayed at the top of the list. This allows quick access to recently used items.
-- **Chronological order**. Items in the Search History list are arranged in chronological order, starting with the oldest or earliest entries and ending with the most recent or latest. Old items gradually move down the list as new entries are added, unless old items in the search history have been used, in which case they will be moved to the top of the list.
+Each field in the Search History list contains some of the **information** available to the application.
 
-**2.** The following **types of objects** get into the Search History list:
-- **Locations**. This can be an address, business name, route number, coordinates, markers, points of interest, OSM notes, or places you tapped on the map.
-- **Tracks and Waypoints**. The list includes tracks you created, recorded, or downloaded that you used in previous routes, and waypoints if you navigated to them separately.
-
-**3.** Each field in the Search History list contains some of the **information** available to the application.
 - An icon that identifies the type or category of the found object.
 - The object name, location, address, or type query. For tracks information about the distance, number of waypoints, and time is displayed.
 - Distance from the your current location to the point and direction by compass.
+
+
+### Order of Items
+
+- **Recent Items**. The most recent requests or locations are displayed at the top of the list. This allows quick access to recently used items.
+- **Chronological order**. Items in the Search History list are arranged in chronological order, starting with the oldest or earliest entries and ending with the most recent or latest. Old items gradually move down the list as new entries are added, unless old items in the search history have been used, in which case they will be moved to the top of the list.
 - In iOS the list is sorted by month.
+
+### Type of Objects
+
+The following **types of objects** get into the Search History list:
+
+- **Locations**. This can be an address, business name, route number, coordinates, markers, points of interest, OSM notes, or places you tapped on the map.
+- **Tracks and Waypoints**. The list includes tracks you created, recorded, or downloaded that you used in previous routes, and waypoints if you navigated to them separately.
 
 
 ## Actions
 
 In the Search History tool, you can [delete](#delete) unnecessary queries, all at once or by individual items. You can use History [export](#export-and-share). The Android app provides an additional action of [sharing](#share-android) search items as a [*gpx*](../../technical/osmand-file-formats/osmand-gpx.md) file.  
 
-You can **disable or enable** the display of the entire search history. In this case, the queries are not deleted from the device. In Android, the switch is located on the main screen of the tool on the [History tab](#overview). In iOS, it is located in *Menu → Settings → OsmAnd Settings → History → Search History*. 
+You can **disable or enable** the display of the entire search history. In this case, the queries are not deleted from the device. In Android, the switch is located on the main screen of the tool on the [History tab](#overview). In iOS, it is located in *Menu → Settings → OsmAnd Settings → History → Search History*.
 
 
 ### Delete
@@ -116,9 +120,10 @@ You can **disable or enable** the display of the entire search history. In this 
 
 </Tabs>
 
-After using OsmAnd for a long time, the *Search History* list can become too long, so deleting search queries helps to clear the list. You can delete queries that are no longer relevant or that you no longer intend to use in the future, which makes it easier to search through the list, especially when you need to find specific search queries quickly.    
+After using OsmAnd for a long time, the *Search History* list can become too long, so deleting search queries helps to clear the list. You can delete queries that are no longer relevant or that you no longer intend to use in the future, which makes it easier to search through the list, especially when you need to find specific search queries quickly.
 
-You need to **long-tap on any of the query items in the list** to open the Delete screen.  
+You need to **long tap any of the query items in the list** to open the Delete screen.
+
 - *Select or deselect random items* - tap the required item in the list.
 - *Select the period available for deleting*, such as day, last 7 days, or month - check the box with the subheading in the list.
 - *You can delete the entire history* at once by tapping the *Select All* button at the bottom of the screen.
@@ -129,7 +134,7 @@ You need to **long-tap on any of the query items in the list** to open the Delet
 
 <Tabs groupId="operating-systems">
 
-<TabItem value="android" label="Android"> 
+<TabItem value="android" label="Android">
 
 *<Translate android="true" ids="shared_string_menu,shared_string_settings,osmand_settings,shared_string_history"/>*
 
@@ -150,7 +155,7 @@ You need to **long-tap on any of the query items in the list** to open the Delet
 There are several available options to export the search history. All files are exported in *osf* (OsmAnd settings File) format.  
 
 1. *Menu → Settings → OsmAnd settings → History → Search history*.  
-    Export is available using the OsmAnd settings menu. For Android, following this path takes you to the delete screen where [Share history](#share-android) is available. In the case of iOS, you can select individual items or the entire history on the screen, and after tapping the *Export* button, go to *Local Backup* menu.    
+    Export is available using the OsmAnd settings menu. For Android, following this path takes you to the delete screen where [Share history](#share-android) is available. In the case of iOS, you can select individual items or the entire history on the screen, and after tapping the *Export* button, go to *Local Backup* menu.
 
 2. *Menu → Settings → OsmAnd settings → History → Actions → Back up as file* (Android).  
     *Menu → Settings → OsmAnd settings → History → Actions → Export* (iOS).  
@@ -165,7 +170,8 @@ There are several available options to export the search history. All files are 
 
 ![Settings History](@site/static/img/search/history_search_share_andr.png)  
 
-Exporting items or the entire search history can be useful in the following cases:  
+Exporting items or the entire search history can be useful in the following cases:
+
 - *Backup*. You can back up your search history to save the information before deleting it and restoring it if necessary.
 - *Transferring to another device*. When you change devices, you can use the export function or the Cloud to transfer your search history to a new device without having to search and enter data again.
 - *Analyze and process data*.  You can export your search history for data analysis or use it in other applications.
@@ -178,7 +184,15 @@ Exporting items or the entire search history can be useful in the following case
 
 The steps to share search history items are similar to [export](#export-and-share), with the difference that you export the whole history at once as an [osf](../../technical/osmand-file-formats/osmand-osf.md) file, while you can share individual selected files in gpx format.  
 
-On the [delete](#delete) screen, select the required items from the Search History list. In the upper-right corner of the screen, there is an icon indicating sharing. Select an available application or action in the list to share. 
+On the [delete](#delete) screen, select the required items from the Search History list. In the upper-right corner of the screen, there is an icon indicating sharing. Select an available application or action in the list to share.
 
 
+## Related Articles
 
+- [Search All](./search-all.md)
+- [Search Address](./search-address.md)
+- [Search POI](./search-poi.md)
+- [Search Coordinates](./search-coordinates.md)
+
+
+> *This article was last updated in July 2024*

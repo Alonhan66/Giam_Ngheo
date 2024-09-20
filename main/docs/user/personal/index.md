@@ -1,43 +1,49 @@
 ---
-sidebar_position: 6
+sidebar_position: 1
 ---
 
 # My data
 
-OsmAnd allows to store and manage different map data like maps, points, tracks; personal data like settings of the application profile.
+OsmAnd allows you to store and manage different data such as maps, points, tracks, personal information, and settings of the application profiles.
 
-### [My Places](./myplaces.md)
+## [Maps & Recources](./maps-resources.md)
 
-'My Places' is a core place within OsmAnd application that allows you to manage all your personally owned information i.e. Favorite points, Tracks (imported, recorded and created GPX files), OpenStreetMap Edits, Audio / Video Notes (Android).
+The *Maps & Resources* menu allows you to do basic operations over online and offline maps and data used in OsmAnd such as downloading, removing, renaming, clearing the cache for online maps, updating, and checking map size.
 
-### [Favorites](./favorites.md)
+## [Global Settings](./global-settings.md)
 
-Favorites is the list of Favorites (user's points) in 'My Places' menu.
+*Common settings* for all application profiles.
 
-### [Tracks](./tracks.md)
+## [Profiles (Settings)](./profiles.md)
 
-Short information about tracks and how to use them
+Each *profile* is available for full customization. Each profile can become a separate application for the needs of the user.
 
-### [Markers](./markers.md)
+## [Color Palette Schemes](./color-palette-schemes.md)
 
-Markers interface is a convenient tool that helps you save points on the map for your short-term needs.
+*Color palette schemes* help you visualize data, making it more understandable. To make the data on the map easier to see and interpret, you can change its display using different color palettes.
 
-### [Maps](./maps.md)
+## [My Places](./myplaces.md)
 
-Maps screen allows you to do basic operations over online and offline maps used in OsmAnd such as downloading, removing, renaming, clearing the cache for online maps, updating and checking maps size.
+*My Places* is the core of the OsmAnd app that allows you to manage all your personal information such as favorite points, tracks as imported, recorded, and created GPX files, OpenStreetMap edits, and audio/video notes.
 
-### [Profiles (Settings)](./profiles.md)
+## [Favorites](./favorites.md)
 
-Each profile is available for full customization. In fact, each profile can become a separate application for the needs of the user.
+*Favorites* is the list of Favorites (user's points) in the *My Places* menu.
 
-### [Global settings](./global-settings.md)
+## [Markers](./markers.md)
 
-Common settings to all application profiles.
+*Markers* interface is a convenient tool that helps you save points on the map for your short-term needs.
 
-### [Import / Export](./import-export.md)
+## [Tracks](./tracks/index.md)
 
-Import / Export
+*Tracks* is a powerful tool for tracking journeys, recording routes and Points of Interest (POIs) in real-time, and later analyzing and sharing data.
 
-### [Storage](./storage.md)
+## [Import / Export](./import-export.md)
 
-How to configure, access and change data storage for maps, tracks and other personal data
+The *Import / Export tool* in OsmAnd allows you to manage your data. You can export your profiles, favorites, tracks, and other settings into a special format accessible through the apps on your device.
+
+## [OsmAnd Cloud](./osmand-cloud.md)
+
+*OsmAnd Cloud* is the resource you need to save your personal settings and app data.
+
+

@@ -2,39 +2,39 @@ import GeneralInfoTab from './GeneralInfoTab';
 import React from 'react';
 import { Tab } from '@mui/material';
 import PointsTab from './PointsTab';
-import SettingsTab from './SettingsTab';
+import TurnsTab from './TurnsTab';
+// import SettingsTab from './SettingsTab';
 import WaypointsTab from './WaypointsTab';
+import { isEmptyTrack, hasSegmentTurns } from '../../../manager/track/TracksManager';
+import { isLocalTrack, isCloudTrack, isRouteTrack } from '../../../context/AppContext';
 
 export default class TrackTabList {
     state = {
         tabs: null,
         tabList: [],
         defaultTab: 'general',
-        graphWidth: 400,
     };
 
-    create(ctx, setShowContextMenu) {
+    create(ctx, setShowInfoBlock) {
         let tabs = {};
         let list = [];
 
-        let isTrack =
-            ctx.currentObjectType === ctx.OBJECT_TYPE_CLOUD_TRACK ||
-            ctx.currentObjectType === ctx.OBJECT_TYPE_LOCAL_CLIENT_TRACK;
-
-        tabs.Info = (
-            <GeneralInfoTab key="general" width={this.state.graphWidth} setShowContextMenu={setShowContextMenu} />
-        );
-        if (ctx.currentObjectType !== ctx.OBJECT_TYPE_CLOUD_TRACK) {
-            tabs.Track = <PointsTab key="points" width={this.state.graphWidth} />;
+        tabs.Info = <GeneralInfoTab key="general" setShowInfoBlock={setShowInfoBlock} />;
+        if (isLocalTrack(ctx)) {
+            tabs.Track = <PointsTab key="points" />;
         }
 
-        if (isTrack) {
-            tabs.Waypoints = <WaypointsTab key="waypoints" width={this.state.graphWidth} />;
+        if ((isCloudTrack(ctx) && !isEmptyTrack(ctx.selectedGpxFile, true, false)) || isLocalTrack(ctx)) {
+            tabs.Waypoints = <WaypointsTab key={'waypoints'} />;
         }
 
-        if (ctx.currentObjectType !== ctx.OBJECT_TYPE_CLOUD_TRACK) {
-            tabs.Settings = <SettingsTab key="settings" width={this.state.graphWidth} />;
+        if (isRouteTrack(ctx) || hasSegmentTurns({ track: ctx.selectedGpxFile })) {
+            tabs.Turns = <TurnsTab key="turns" />;
         }
+
+        // if (isLocalTrack(ctx)) {
+        //     tabs.Settings = <SettingsTab key="settings" />;
+        // }
 
         list = list.concat(
             Object.keys(tabs).map((item) => <Tab value={tabs[item].key + ''} label={item} key={'tab:' + item} />)

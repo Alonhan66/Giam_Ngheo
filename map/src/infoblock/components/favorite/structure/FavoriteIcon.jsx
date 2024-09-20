@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import MarkerOptions from '../../../../map/markers/MarkerOptions';
+import { ICONS_PREFIX, POI_ICONS_FOLDER } from '../../../../map/markers/MarkerOptions';
 import { AppBar, Box, ListItem, ListItemButton, ListItemText, Tab, Typography } from '@mui/material';
 import { History } from '@mui/icons-material';
 import Paper from '@mui/material/Paper';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import favoriteEditMenuStyles from '../../../styles/FavoriteEditMenuStyles';
-import FavoritesManager from '../../../../context/FavoritesManager';
+import FavoritesManager from '../../../../manager/FavoritesManager';
+import { isEmpty } from 'lodash';
 
 export default function FavoriteIcon({
     favoriteIcon,
@@ -15,6 +16,7 @@ export default function FavoriteIcon({
     selectedGpxFile,
     add,
     defaultIcon,
+    widthDialog,
 }) {
     const favoriteStyles = favoriteEditMenuStyles();
 
@@ -29,7 +31,7 @@ export default function FavoriteIcon({
                 sx={{
                     flexWrap: 'wrap',
                     display: 'flex',
-                    maxWidth: 400,
+                    maxWidth: `${widthDialog}px`,
                 }}
             >
                 {icons.map((icon, index) => {
@@ -46,14 +48,13 @@ export default function FavoriteIcon({
                                 <div
                                     className={favoriteStyles.shape}
                                     dangerouslySetInnerHTML={{
-                                        __html: `
-                              <div>
-                                  <svg class="background" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                                      <circle cx="24" cy="24" r="12" fill="#c1c1c1"/>
-                                  </svg>
-                                  <img class="icon" src="/map/images/${MarkerOptions.POI_ICONS_FOLDER}/mx_${icon}.svg">
-                              </div>
-                              `,
+                                        __html:
+                                            `<div>` +
+                                            `<svg class="background" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">` +
+                                            `<circle cx="24" cy="24" r="12" fill="#c1c1c1" />` +
+                                            `</svg>` +
+                                            `<img class="icon" src="/map/images/${POI_ICONS_FOLDER}/${ICONS_PREFIX}${icon}.svg">` +
+                                            `</div>`,
                                     }}
                                 />
                             </ListItemButton>
@@ -69,11 +70,12 @@ export default function FavoriteIcon({
             tabs[category[0]] = <ListIcons key={category[0]} icons={category[1].icons} />;
         });
 
-    tabs[FavoritesManager.DEFAULT_TAB_ICONS] = add ? (
-        <ListIcons key={FavoritesManager.DEFAULT_TAB_ICONS} icons={[MarkerOptions.DEFAULT_WPT_ICON]} />
-    ) : (
-        getTabUsedIcons()
-    );
+    tabs[FavoritesManager.DEFAULT_TAB_ICONS] =
+        add || isEmpty(selectedGpxFile) ? (
+            <ListIcons key={FavoritesManager.DEFAULT_TAB_ICONS} icons={[favoriteIcon]} />
+        ) : (
+            getTabUsedIcons()
+        );
 
     list =
         tabs &&
@@ -86,8 +88,11 @@ export default function FavoriteIcon({
             })
         );
 
+    list = list.filter((t) => t !== null);
+
     list.length > 0 &&
         currentIconCategories &&
+        tabs[currentIconCategories] &&
         list.unshift(
             <Tab
                 value={tabs[currentIconCategories].key + ''}
@@ -96,6 +101,7 @@ export default function FavoriteIcon({
             />
         );
     list.length > 0 &&
+        tabs[FavoritesManager.DEFAULT_TAB_ICONS] &&
         list.unshift(
             <Tab
                 icon={<History />}
@@ -126,8 +132,7 @@ export default function FavoriteIcon({
                 component="div"
                 sx={{
                     flexGrow: 1,
-                    width: 450,
-                    overflow: 'hidden',
+                    maxWidth: `${widthDialog}px`,
                 }}
             >
                 <Paper>

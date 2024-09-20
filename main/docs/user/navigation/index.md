@@ -24,7 +24,7 @@ In the **Set up a route** section, you can read basics about how to start naviga
 - [Navigation by markers](./setup/markers-navigation.md)
 - [Route details](./setup/route-details.md)
 
-In the **[Route parameters](./routing/index.md)** section, you can read about different routing types, online and offline. This section also describes routing rules, that determine how your route will be calculated. Common route parameters are described in the [index article](./routing/index.md). Other articles describe the features of certain rooting types.
+In the **[Route parameters](./routing/osmand-routing.md#routing-types)** section, you can read about different routing types, online and offline. This section also describes routing rules, that determine how your route will be calculated. Common route parameters are described in the [index article](./routing/osmand-routing.md#routing-types). Other articles describe the features of certain rooting types.
 - [Car routing (Truck, Motorcycle)](./routing/car-based-routing.md)
 - [Bicycle routing (MTB)](./routing/bicycle-based-routing.md)
 - [Moped routing](./routing/moped-routing.md)
@@ -41,8 +41,8 @@ In the **[Route parameters](./routing/index.md)** section, you can read about di
 
 In **Navigation guidance**, you can find all the needed information about how to customize the Navigation tool in Osmand.
 
-- [Configure map screen](./guidance/map-during-navigation.md)
-- [Voice prompts / Notifications](./guidance/map-during-navigation.md)
+- [Map screen during navigation](./guidance/map-during-navigation.md)
+- [Voice prompts / Notifications](./guidance/voice-navigation.md)
 - [Navigation settings](./guidance/navigation-settings.md)
 
 And also two special use cases of Navigation tool:

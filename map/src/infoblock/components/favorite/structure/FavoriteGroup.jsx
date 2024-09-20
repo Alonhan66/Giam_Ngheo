@@ -1,13 +1,13 @@
 import { Box, Grid, IconButton, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import { Add, Folder } from '@mui/icons-material';
 import React, { useContext, useState } from 'react';
-import FavoritesManager from '../../../../context/FavoritesManager';
+import FavoritesManager from '../../../../manager/FavoritesManager';
 import Utils from '../../../../util/Utils';
 import AddNewGroupDialog from '../AddNewGroupDialog';
 import _ from 'lodash';
 import AppContext from '../../../../context/AppContext';
 
-export default function FavoriteGroup({ favoriteGroup, setFavoriteGroup, groups, defaultGroup }) {
+export default function FavoriteGroup({ favoriteGroup, setFavoriteGroup, groups, defaultGroup, widthDialog }) {
     const ctx = useContext(AppContext);
 
     const [addGroupDialogOpen, setAddGroupDialogOpen] = useState(false);
@@ -22,7 +22,7 @@ export default function FavoriteGroup({ favoriteGroup, setFavoriteGroup, groups,
         if (g && g.color) {
             colorGroup = Utils.hexToArgb(g.color);
         }
-        let size = g && g.points?.length;
+        let size = g && (g.groupSize ? g.groupSize : g.points?.length);
         return (
             <Box
                 sx={{
@@ -112,9 +112,8 @@ export default function FavoriteGroup({ favoriteGroup, setFavoriteGroup, groups,
             <Box
                 sx={{
                     display: 'flex',
-                    width: 450,
-                    overflow: 'hidden',
-                    overflowX: 'scroll',
+                    maxWidth: `${widthDialog}px`,
+                    overflowX: 'auto',
                 }}
             >
                 {groupList.length > 0 &&

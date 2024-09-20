@@ -13,10 +13,11 @@ import {
 import React, { useContext, useState, useCallback } from 'react';
 import { Cancel, ViewHeadline } from '@mui/icons-material';
 import AppContext from '../../../context/AppContext';
-import TracksManager from '../../../context/TracksManager';
+import TracksManager from '../../../manager/track/TracksManager';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-import PointManager from '../../../context/PointManager';
+import PointManager from '../../../manager/PointManager';
 import contextMenuStyles from '../../styles/ContextMenuStyles';
+import { confirm } from '../../../dialogs/GlobalConfirmationDialog';
 import _ from 'lodash';
 
 const PointsTab = ({ width }) => {
@@ -54,25 +55,27 @@ const PointsTab = ({ width }) => {
     });
 
     function getPoints() {
-        let points = ctx.selectedGpxFile?.points;
-        if (points) {
-            TracksManager.addDistanceToPoints(points);
-            return points;
-        }
+        return ctx.selectedGpxFile.points ?? []; // distance is already exist
     }
 
     function deleteAllPoints() {
-        if (ctx.selectedGpxFile) {
-            if (ctx.selectedGpxFile.points) {
-                ctx.selectedGpxFile.points = [];
-            }
-            if (ctx.selectedGpxFile.tracks) {
-                ctx.selectedGpxFile.tracks = [];
-            }
-            ctx.selectedGpxFile.updateLayers = true;
-            ctx.selectedGpxFile.analysis = null;
-            ctx.setSelectedGpxFile({ ...ctx.selectedGpxFile });
-        }
+        confirm({
+            ctx,
+            text: 'Delete all track points?',
+            callback: () => {
+                if (ctx.selectedGpxFile) {
+                    if (ctx.selectedGpxFile.points) {
+                        ctx.selectedGpxFile.points = [];
+                    }
+                    if (ctx.selectedGpxFile.tracks) {
+                        ctx.selectedGpxFile.tracks = [];
+                    }
+                    ctx.selectedGpxFile.updateLayers = true;
+                    ctx.selectedGpxFile.analysis = null;
+                    ctx.setSelectedGpxFile({ ...ctx.selectedGpxFile });
+                }
+            },
+        });
     }
 
     const PointRow = ({ point, index }) => {
@@ -95,7 +98,7 @@ const PointsTab = ({ width }) => {
                             <Typography variant="inherit" noWrap>
                                 Point - {index + 1}
                                 <br />
-                                {point.distanceFromStart === 0 ? 'start' : Math.round(point.distanceFromStart) + ' m'}
+                                {point.distanceSegment === 0 ? 'start' : Math.round(point.distanceSegment) + ' m'}
                                 {point.profile && ' • '}
                                 {point.profile}
                             </Typography>
@@ -136,8 +139,8 @@ const PointsTab = ({ width }) => {
                     </Alert>
                 )}
             {ctx.createTrack && ctx.selectedGpxFile?.points?.length > 0 && (
-                <Button variant="contained" className={styles.button} onClick={() => deleteAllPoints()}>
-                    Clear
+                <Button variant="contained" className={styles.button} onClick={deleteAllPoints}>
+                    Clear points
                 </Button>
             )}
             {ctx.selectedGpxFile?.points && (

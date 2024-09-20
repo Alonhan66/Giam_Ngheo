@@ -1,0 +1,360 @@
+.wikiIcon {
+    border-radius: 50%;
+    border: 3px solid white;
+    object-fit: cover;
+    filter: drop-shadow(0px 1px 4px rgba(0, 0, 0, 0.25)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.1));
+}
+.wikiIconHover {
+    border-radius: 50%;
+    border: 3px solid white;
+    object-fit: cover;
+    filter: drop-shadow(0px 1px 4px rgba(0, 0, 0, 0.25)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.1));
+    box-shadow: 0 0 0 3px var(--selected-color) !important;
+}
+
+.wikiIconSmall {
+    width: 24px;
+    height: 24px;
+}
+
+.wikiIconLarge {
+    width: 46px;
+    height: 46px;
+}
+
+.wikiIcon:hover {
+    box-shadow: 0 0 0 3px var(--selected-color) !important;
+}
+.hoverIcon:hover {
+    border-radius: 100% !important;
+    box-shadow: 0 0 0 3px var(--selected-color) !important;
+    width: 24px !important;
+    height: 24px !important;
+}
+.hoverPointer {
+    border-radius: 100% !important;
+    box-shadow: 0 0 0 3px var(--selected-color) !important;
+    width: 24px !important;
+    height: 24px !important;
+    margin-left: -6px !important;
+    margin-top: -6px !important;
+}
+.searchItem,
+.searchHoverItem {
+    display: flex !important;
+    padding: 12px 16px !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    gap: 32px !important;
+}
+
+.searchHoverItem {
+    background-color: #f0f0f0 !important;
+}
+.searchIcon {
+    padding: 8px;
+}
+.focusedIcon {
+    fill: var(--selected-color) !important;
+}
+.customAutofillFix input:-webkit-autofill,
+.customAutofillFix input:-webkit-autofill:hover,
+.customAutofillFix input:-webkit-autofill:focus,
+.customAutofillFix input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+    box-shadow: 0 0 0 1000px transparent inset !important;
+    -webkit-text-fill-color: inherit !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+}
+.placeTypes {
+    font-family: Roboto !important;
+    color: var(--text-secondary) !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+}
+.explorePlaceTypes {
+    margin-left: 8px !important;
+    font-family: Roboto !important;
+    color: var(--text-secondary) !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+}
+.placeDesc {
+    color: var(--text-secondary) !important;
+    font-family: Roboto !important;
+    font-size: 14px !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+}
+.placeTypesIcon {
+    min-width: 16px !important;
+    max-width: 16px !important;
+    fill: var(--svg-icon-color) !important;
+}
+.placeTypesEmptyIcon {
+    min-width: 24px !important;
+    max-width: 24px !important;
+    fill: #c0c0c0 !important;
+}
+.titleText {
+    font-family: Roboto;
+    color: var(--text-primary) !important;
+    font-size: 16px !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+}
+.placeItem {
+    display: flex !important;
+    padding: 16px !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    gap: 24px !important;
+}
+.hoverItem {
+    display: flex !important;
+    padding: 16px !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    gap: 24px !important;
+    background-color: #f0f0f0 !important;
+}
+.emptyImg {
+    min-width: 66px !important;
+    min-height: 66px !important;
+    background-color: #ebebeb !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.filter {
+    max-width: 277px !important;
+    overflow: auto;
+    overflow-x: hidden;
+    padding: 6px 0px !important;
+    border-radius: 3px !important;
+    min-height: 44px !important;
+    box-shadow:
+        0px 5px 5px 0px rgba(0, 0, 0, 0.2),
+        0px 3px 14px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 10px 0px rgba(0, 0, 0, 0.14),
+        0px -3px 30px 0px rgba(0, 0, 0, 0.09) !important;
+}
+.filterTitle {
+    display: flex !important;
+    padding: 5px 4px 5px 16px !important;
+    gap: 24px !important;
+}
+.filterTitleText {
+    color: var(--text-secondary) !important;
+    font-size: 14px !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+}
+.filterItem {
+    display: flex !important;
+    padding: 5px 4px 5px 16px !important;
+    justify-content: center;
+    align-items: center;
+    gap: 24px !important;
+}
+.filterIcon {
+    min-width: 24px !important;
+    fill: var(--svg-icon-color) !important;
+}
+.filterIconSelected {
+    min-width: 24px !important;
+    fill: var(--selected-color) !important;
+}
+.photoTitle {
+    display: flex !important;
+    width: 360px !important;
+    padding: 0px 16px !important;
+    gap: 6px !important;
+    height: 48px !important;
+}
+.photoCloseButton {
+    display: flex !important;
+    padding: 6px 0px !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    align-self: stretch !important;
+    border-radius: 3px !important;
+    background-color: var(--button) !important;
+    color: var(--selected-color) !important;
+    text-align: center !important;
+    font-size: 14px !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    line-height: 140% !important;
+    letter-spacing: 0.28px !important;
+    text-transform: none !important;
+}
+.photoTitleText {
+    color: var(--text-primary) !important;
+    font-size: 16px !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+}
+.tooltip {
+    border-radius: 33px !important;
+}
+.iconsPrevNextBlock {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: translateY(-50%) !important;
+    padding: 0 16px !important;
+}
+.iconsPrevNext {
+    border-radius: 50px !important;
+    border: 2px solid #deebff !important;
+    fill: white !important;
+    display: flex !important;
+    padding: 24px 16px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
+}
+
+.iconsPrevNext:hover {
+    border-radius: 50px !important;
+    background: #deebff !important;
+    fill: var(--selected-color) !important;
+}
+.iconsPrevNext:disabled {
+    border-color: transparent !important;
+    background-color: transparent !important;
+    fill: transparent !important;
+}
+.singlePhotoTitle {
+    flex-grow: 1;
+    color: white !important;
+    font-size: 18px !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    line-height: normal !important;
+    letter-spacing: 0.18px !important;
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+}
+.imageItem {
+    position: relative !important;
+}
+
+.skeleton {
+    width: 100% !important;
+}
+
+.image {
+    display: block !important;
+    width: 156px !important;
+    height: 156px !important;
+    object-fit: cover !important;
+    box-sizing: border-box !important;
+}
+
+.selectedImage {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: 4px solid var(--selected-color) !important;
+    box-sizing: border-box !important;
+}
+.photoFooter {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 16px !important;
+    background-color: black !important;
+    position: absolute !important;
+    height: 88px !important;
+}
+.mainPhotoGallery {
+    width: 148px !important;
+    height: 148px !important;
+    object-fit: cover !important;
+    cursor: pointer !important;
+}
+.mainPhotoGallery:hover {
+    outline: 4px solid var(--selected-color) !important;
+    box-sizing: border-box !important;
+}
+.littlePhotoGallery {
+    width: 71px !important;
+    height: 71px !important;
+    object-fit: cover !important;
+    cursor: pointer !important;
+}
+.littlePhotoGallery:hover {
+    outline: 4px solid var(--selected-color) !important;
+    box-sizing: border-box !important;
+}
+.searchInputField {
+    background: #f2f2f2;
+    border-radius: 6px !important;
+}
+.searchInput {
+    padding-right: 0px !important;
+    height: 56px !important;
+}
+.searchInputIcon {
+    width: 56px !important;
+    height: 56px !important;
+}
+.buttonShowAllExplore {
+    text-transform: none !important;
+    color: var(--selected-color) !important;
+    margin: 10px !important;
+    padding: 0 !important;
+    align-self: flex-start !important;
+}
+.categoryItem {
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    height: 100%;
+    width: 100%;
+}
+.categoryItemText {
+    color: var(--text-secondary) !important;
+    text-align: center !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+}
+.categoryItemIcon {
+    text-align: center !important;
+    justify-content: center !important;
+}
+.gridItem {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100%;
+    padding: 0px 0px 0px 0px !important;
+    &:hover {
+        background-color: #deebff !important;
+        border-radius: 3px !important;
+    }
+}
+.categoriesListItem {
+    display: flex !important;
+    width: 360px !important;
+    padding: 0px 4px 0px 16px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 24px !important;
+    min-height: 48px !important;
+}
+.divider {
+    margin-left: 16px !important;
+    margin-bottom: 0px !important;
+    margin-top: 0px !important;
+}

@@ -1,7 +1,7 @@
 import { copyObj } from '../../../util/Utils';
 import { apiGet } from '../../../util/HttpApi';
-import TracksManager from '../../../context/TracksManager';
-import onlineRoutingProviders from '../../../generated/online-routing-providers.json';
+import TracksManager from '../../../manager/track/TracksManager';
+import onlineRoutingProviders from '../../../resources/generated/online-routing-providers.json';
 
 const PROFILE_LINE = TracksManager.PROFILE_LINE;
 const PROFILE_LINE_NAME = PROFILE_LINE[0].toUpperCase() + PROFILE_LINE.slice(1);
@@ -16,11 +16,14 @@ function getColors() {
         horsebackriding: '#7f3431',
         pedestrian: '#d90139',
         ski: '#ffacdf',
-        [PROFILE_LINE]: '#5F9EA0',
+        [PROFILE_LINE]: '#2F6E80',
         moped: '#3e690e',
         train: '#a56b6f',
         rescuetrack: '#0000ff',
         'rescuetrack-emergency': '#ff0000',
+        'OSRM-car': '#1976d2',
+        'OSRM-bike': '#9053bd',
+        'OSRM-foot': '#d90139',
     };
 }
 
@@ -59,7 +62,7 @@ async function loadProvidersOSRM() {
         return json.providers; // success
     }
 
-    console.log('failed to load osrm providers');
+    console.error('failed to load osrm providers');
     return null;
 }
 
@@ -85,7 +88,7 @@ async function loadProfilesOsmAnd() {
         const json = copyObj(data);
 
         Object.keys(json).forEach((k) => {
-            if (k.includes('rescuetrack') && process.env.REACT_APP_RESCUETRACK_PROFILE === 'hide') {
+            if (k.includes('rescuetrack') && process.env.REACT_APP_DEVEL_FEATURES !== 'yes') {
                 return;
             }
             if (json[k]?.params) {
@@ -103,7 +106,7 @@ async function loadProfilesOsmAnd() {
         return converted; // success
     }
 
-    console.log('failed to load osmand profiles');
+    console.error('failed to load osmand profiles');
     return null;
 }
 
@@ -116,7 +119,7 @@ export async function loadProviders({ parseQueryString = false } = {}) {
 
     const osrm = (await loadProvidersOSRM()) || [];
 
-    next.providers = [].concat(osrm, osmand); // default OSRM first
+    next.providers = [].concat(osmand, osrm); // OsmAnd is default since HH-routing was activated
 
     // set 1st router/profile
     next.type = next.providers[0].type;
@@ -127,7 +130,7 @@ export async function loadProviders({ parseQueryString = false } = {}) {
     if (parseQueryString) {
         const searchParams = new URLSearchParams(window.location.search);
 
-        const type = searchParams.get('type');
+        const type = searchParams.get('type') ?? 'osmand';
         const profile = searchParams.get('profile');
 
         if (type && profile) {
@@ -138,6 +141,7 @@ export async function loadProviders({ parseQueryString = false } = {}) {
 
             if (searchParams.get('params')) {
                 const freshParams = TracksManager.decodeRouteMode({
+                    profile,
                     routeMode: searchParams.get('params').toString().replaceAll(':', '='),
                     params: next.getResetParams({ router: picked.router, profile: picked.profile }),
                 });

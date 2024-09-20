@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import AppContext from '../../context/AppContext';
 import { TileLayer, LayersControl } from 'react-leaflet';
+import _ from 'lodash';
+import { disableLayers } from '../../manager/WeatherManager';
 
 function getWeatherTime(weatherDateObj) {
     let h = weatherDateObj.getUTCHours();
@@ -24,6 +26,31 @@ const WeatherLayer = () => {
     const ctx = useContext(AppContext);
 
     const [time, setTime] = useState(null);
+
+    useEffect(() => {
+        let newLayers = { ...ctx.weatherLayers };
+        Object.keys(newLayers).forEach((type) => {
+            if (type !== ctx.weatherType) {
+                newLayers[type].forEach((l) => {
+                    if (l.checked) {
+                        const index = _.indexOf(newLayers[type], l);
+                        if (!disableLayers(newLayers[ctx.weatherType][index], ctx)) {
+                            newLayers[ctx.weatherType][index].checked = true;
+                        }
+                        newLayers[type][index].checked = false;
+                    }
+                });
+            }
+        });
+        ctx.setWeatherLayers(newLayers);
+    }, [ctx.weatherType]);
+
+    useEffect(() => {
+        if (map) {
+            map.on('zoomend', () => ctx.setMapBbox(map.getBounds()));
+            map.on('dragend', () => ctx.setMapBbox(map.getBounds()));
+        }
+    }, [map]);
 
     useEffect(() => {
         if (map) {
@@ -74,6 +101,7 @@ const WeatherLayer = () => {
                                 checked={item.checked}
                             >
                                 <TileLayer
+                                    id={'se-weather-l-' + item.key}
                                     name={'weather-' + item.key}
                                     url={item.url}
                                     time={time}

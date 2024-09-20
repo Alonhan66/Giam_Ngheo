@@ -1,25 +1,52 @@
-import { AppBar, Button, LinearProgress, Box } from '@mui/material';
-import AppContext from '../../context/AppContext';
+import { AppBar, LinearProgress, Box, Typography, IconButton } from '@mui/material';
+import AppContext, {
+    isLocalTrack,
+    OBJECT_TYPE_NAVIGATION_ALONE,
+    OBJECT_TYPE_WEATHER,
+    isTrack,
+} from '../../context/AppContext';
 import React, { useState, useContext, useEffect, useCallback } from 'react';
-import { TabContext, TabList, TabPanel } from '@mui/lab';
-import { Close } from '@mui/icons-material';
+import { TabContext, TabList } from '@mui/lab';
 import TrackTabList from './tabs/TrackTabList';
-import WeatherTabList from './tabs/WeatherTabList';
-import PanelButtons from './PanelButtons';
-import FavoritesTabList from './tabs/FavoritesTabList';
-import _ from 'lodash';
-import ChangeProfileTrackDialog from './track/dialogs/ChangeProfileTrackDialog';
-import PointContextMenu from './PointContextMenu';
-import PoiTabList from '../PoiTabList';
+import _, { isEmpty } from 'lodash';
+import { hasSegmentTurns } from '../../manager/track/TracksManager';
+import { MENU_INFO_CLOSE_SIZE } from '../../manager/GlobalManager';
+import { ReactComponent as BackIcon } from '../../assets/icons/ic_arrow_back.svg';
+import styles from '../../menu/trackfavmenu.module.css';
+import { isVisibleTrack } from '../../menu/visibletracks/VisibleTracks';
+import WeatherForecastDetails from '../../menu/weather/WeatherForecastDetails';
+import WptDetails from './wpt/WptDetails';
+import WptPhotoList from './wpt/WptPhotoList';
 
-export default function InformationBlock({ hideContextMenu, drawerWidth }) {
+const PersistentTabPanel = ({ tabId, selectedTabId, children }) => {
+    const [mounted, setMounted] = useState(false);
+
+    if (tabId === selectedTabId || mounted) {
+        mounted || setMounted(true);
+        const hidden = tabId !== selectedTabId;
+        return (
+            <Typography hidden={hidden} component="span">
+                <Box sx={{ px: 3, pt: 3, pb: 8 }}>{children}</Box>
+            </Typography>
+        );
+    } else {
+        // mounted || setTimeout(() => setMounted(true), 1000); // mount not-selected tabs with delay
+    }
+
+    return null;
+};
+
+export default function InformationBlock({ showInfoBlock, setShowInfoBlock, setClearState, mainMenuSize }) {
+    const DRAWER_SIZE = 360;
+
     const ctx = useContext(AppContext);
 
-    const [showContextMenu, setShowContextMenu] = useState(false);
     const [value, setValue] = useState('general');
     const [tabsObj, setTabsObj] = useState(null);
     const [prevTrack, setPrevTrack] = useState(null);
-    const [clearState, setClearState] = useState(false);
+    const [openWeatherForecastDetails, setOpenWeatherForecastDetails] = useState(false);
+    const [openWptDetails, setOpenWptDetails] = useState(false);
+    const [openWptTab, setOpenWptTab] = useState(false);
 
     /**
      * Handle Escape key to close PointContextMenu.
@@ -39,57 +66,100 @@ export default function InformationBlock({ hideContextMenu, drawerWidth }) {
     }, [ctx.pointContextMenu]);
 
     useEffect(() => {
-        if (!showContextMenu) {
+        if (!showInfoBlock) {
+            // stop-editor (close button)
             stopCreatedTrack(false);
-            ctx.setShowPoints({ points: true, wpts: true });
+            ctx.mutateShowPoints({ points: true, wpts: true });
             ctx.setTrackRange(null);
             setClearState(true);
-            ctx.setCurrentObjectType(null);
+
+            if (!isEmpty(ctx.selectedGpxFile) && !isVisibleTrack(ctx.selectedGpxFile)) {
+                if (!isEmpty(ctx.gpxFiles) && ctx.gpxFiles[ctx.selectedGpxFile.name]) {
+                    ctx.mutateGpxFiles((o) => (o[ctx.selectedGpxFile.name].url = null));
+                }
+            }
         }
-    }, [showContextMenu]);
+    }, [showInfoBlock]);
 
     useEffect(() => {
-        if (ctx.currentObjectType !== ctx.OBJECT_TYPE_LOCAL_CLIENT_TRACK && ctx.createTrack) {
+        const width = getWidth();
+        const px = parseFloat(width) || 0; // 100px -> 100, auto -> 0
+        const padding = px || DRAWER_SIZE + Number(mainMenuSize.replace('px', '')) + 24; // always apply right padding on desktop
+        ctx.mutateFitBoundsPadding((o) => (o.left = padding));
+    }, [showInfoBlock]);
+
+    // detect leaving from Local Track Editor when another kind of object type is activated
+    useEffect(() => {
+        if (ctx.currentObjectType && isLocalTrack(ctx) === false && ctx.createTrack) {
             stopCreatedTrack(true);
         }
     }, [ctx.currentObjectType]);
 
+    // used to add Turns tab when the turns appeared
     useEffect(() => {
-        if (
-            (!ctx.selectedGpxFile || _.isEmpty(ctx.selectedGpxFile)) &&
-            ctx.currentObjectType !== ctx.OBJECT_TYPE_WEATHER
-        ) {
+        isLocalTrack(ctx) && ctx.setUpdateInfoBlock(true);
+    }, [hasSegmentTurns({ track: ctx.selectedGpxFile })]);
+
+    function isValidWeatherObj() {
+        return ctx.currentObjectType === OBJECT_TYPE_WEATHER && ctx.weatherDate;
+    }
+
+    useEffect(() => {
+        if ((!ctx.selectedGpxFile || _.isEmpty(ctx.selectedGpxFile)) && ctx.currentObjectType !== OBJECT_TYPE_WEATHER) {
             setPrevTrack(null);
             setTabsObj(null);
-            setShowContextMenu(false);
+            setShowInfoBlock(false);
         } else {
             if (!ctx.currentObjectType) {
                 setTabsObj(null);
-                setShowContextMenu(false);
-            } else if (ctx.updateContextMenu || !prevTrack || Object.keys(prevTrack).length === 0 || !showContextMenu) {
-                let obj;
+                setShowInfoBlock(false);
+            } else if (ctx.updateInfoBlock || !prevTrack || Object.keys(prevTrack).length === 0 || !showInfoBlock) {
+                let tObj;
                 setPrevTrack(ctx.selectedGpxFile);
-                ctx.setUpdateContextMenu(false);
-                if (ctx.currentObjectType === ctx.OBJECT_TYPE_CLOUD_TRACK && ctx.selectedGpxFile?.tracks) {
-                    obj = new TrackTabList().create(ctx, setShowContextMenu);
-                } else if (ctx.currentObjectType === ctx.OBJECT_TYPE_WEATHER && ctx.weatherPoint) {
-                    obj = new WeatherTabList().create(ctx);
-                } else if (ctx.currentObjectType === ctx.OBJECT_TYPE_FAVORITE) {
-                    obj = new FavoritesTabList().create(ctx);
-                } else if (ctx.currentObjectType === ctx.OBJECT_TYPE_POI) {
-                    obj = new PoiTabList().create();
-                } else if (ctx.selectedGpxFile) {
-                    obj = new TrackTabList().create(ctx, setShowContextMenu);
+                ctx.setUpdateInfoBlock(false);
+                if (isValidWeatherObj()) {
+                    setOpenWeatherForecastDetails(true);
+                    setShowInfoBlock(true);
+                } else if (ctx.currentObjectType === OBJECT_TYPE_NAVIGATION_ALONE) {
+                    // don't display InfoBlock in Navigation menu until details requested
+                } else if (ctx.selectedGpxFile && isTrack(ctx)) {
+                    // finally assume that default selectedGpxFile is a track
+                    tObj = new TrackTabList().create(ctx, setShowInfoBlock);
                 }
-                if (obj) {
-                    setShowContextMenu(true);
+                if (tObj) {
+                    setShowInfoBlock(true);
                     clearStateIfObjChange();
-                    setTabsObj(obj);
-                    setValue(obj.defaultTab);
+                    setTabsObj(tObj);
+                    setValue(tObj.defaultTab);
                 }
             }
         }
-    }, [ctx.currentObjectType, ctx.selectedGpxFile, ctx.weatherPoint, ctx.updateContextMenu]);
+    }, [ctx.currentObjectType, ctx.selectedGpxFile, ctx.updateInfoBlock]);
+
+    useEffect(() => {
+        if (ctx.selectedWpt) {
+            setShowInfoBlock(true);
+            setOpenWptDetails(true);
+        } else {
+            setOpenWptDetails(false);
+        }
+    }, [ctx.selectedWpt]);
+
+    useEffect(() => {
+        if (!ctx.loginUser) {
+            setShowInfoBlock(false);
+            setOpenWptDetails(false);
+        }
+    }, [ctx.loginUser]);
+
+    useEffect(() => {
+        if (openWptTab) {
+            let tObj = new TrackTabList().create(ctx, setShowInfoBlock);
+            clearStateIfObjChange();
+            setTabsObj(tObj);
+            setValue('waypoints');
+        }
+    }, [openWptTab]);
 
     function clearStateIfObjChange() {
         if (
@@ -105,7 +175,7 @@ export default function InformationBlock({ hideContextMenu, drawerWidth }) {
 
     function stopCreatedTrack(deletePrev) {
         if (ctx.createTrack) {
-            ctx.createTrack.enable = false;
+            ctx.createTrack.enable = false; // stop-editor
             if (deletePrev) {
                 ctx.createTrack.deletePrev = deletePrev;
             }
@@ -115,51 +185,85 @@ export default function InformationBlock({ hideContextMenu, drawerWidth }) {
         }
     }
 
+    function getWidth() {
+        if (showInfoBlock) {
+            return `${DRAWER_SIZE + 24}px`;
+        } else {
+            return MENU_INFO_CLOSE_SIZE;
+        }
+    }
+
+    function hasOldTabs() {
+        return !openWeatherForecastDetails && !openWptDetails;
+    }
+
     return (
         <>
-            {showContextMenu && !hideContextMenu && (
+            {showInfoBlock && (
                 <>
-                    <Box
-                        anchor={'right'}
-                        sx={{ alignContent: 'flex-end', height: '100vh', overflow: 'auto', width: '800px !important' }}
-                    >
-                        <div>
-                            {(ctx.loadingContextMenu || ctx.gpxLoading) && <LinearProgress size={20} />}
-                            {tabsObj && tabsObj.tabList.length > 0 && (
-                                <TabContext value={value}>
-                                    <AppBar position="static" color="default">
-                                        <div style={{ display: 'inherit' }}>
-                                            <Button key="close" onClick={() => setShowContextMenu(false)}>
-                                                <Close />
-                                            </Button>
-                                            <TabList onChange={(e, newValue) => setValue(newValue)}>
-                                                {tabsObj.tabList}
-                                            </TabList>
+                    {openWeatherForecastDetails && <WeatherForecastDetails setShowInfoBlock={setShowInfoBlock} />}
+                    {openWptDetails &&
+                        (ctx.photoGallery ? (
+                            <WptPhotoList photos={ctx.photoGallery} />
+                        ) : (
+                            <WptDetails
+                                isDetails={
+                                    ctx.selectedWpt?.trackWptItem || ctx.selectedWpt?.favItem || ctx.searchResult
+                                }
+                                setOpenWptTab={setOpenWptTab}
+                                setShowInfoBlock={setShowInfoBlock}
+                            />
+                        ))}
+                    {hasOldTabs() && (
+                        <Box anchor={'right'} sx={{ height: 'auto', width: getWidth(), overflowX: 'hidden' }}>
+                            <div id="se-infoblock-all">
+                                {(ctx.loadingContextMenu || ctx.gpxLoading) && <LinearProgress size={20} />}
+                                <IconButton
+                                    id={'se-button-back'}
+                                    size="small"
+                                    edge="start"
+                                    color="inherit"
+                                    aria-label="menu"
+                                    className={styles.appBarIcon}
+                                    sx={{ mx: '11px', my: '11px' }}
+                                    onClick={() => {
+                                        setShowInfoBlock(false);
+                                        ctx.setCurrentObjectType(null);
+                                    }}
+                                >
+                                    <BackIcon />
+                                </IconButton>
+                                {tabsObj && tabsObj.tabList.length > 0 && (
+                                    <TabContext value={value}>
+                                        <AppBar position="static" color="default">
+                                            <div>
+                                                <TabList
+                                                    variant="scrollable"
+                                                    scrollButtons
+                                                    onChange={(e, newValue) => setValue(newValue)}
+                                                >
+                                                    {tabsObj.tabList}
+                                                </TabList>
+                                            </div>
+                                        </AppBar>
+                                        <div>
+                                            {Object.values(tabsObj.tabs).map((item) => (
+                                                <PersistentTabPanel
+                                                    key={'tabpanel-desktop:' + item.key}
+                                                    selectedTabId={value}
+                                                    tabId={item.key}
+                                                >
+                                                    {item}
+                                                </PersistentTabPanel>
+                                            ))}
                                         </div>
-                                    </AppBar>
-                                    <div>
-                                        {Object.values(tabsObj.tabs).map((item) => (
-                                            <TabPanel value={item.key + ''} key={'tabpanel:' + item.key}>
-                                                {item}
-                                            </TabPanel>
-                                        ))}
-                                    </div>
-                                </TabContext>
-                            )}
-                        </div>
-                    </Box>
+                                    </TabContext>
+                                )}
+                            </div>
+                        </Box>
+                    )}
                 </>
             )}
-            {showContextMenu && (
-                <PanelButtons
-                    drawerWidth={drawerWidth}
-                    showContextMenu={showContextMenu}
-                    setShowContextMenu={setShowContextMenu}
-                    clearState={clearState}
-                />
-            )}
-            {ctx.trackProfileManager?.change && <ChangeProfileTrackDialog open={true} />}
-            {ctx.pointContextMenu.ref && <PointContextMenu anchorEl={ctx.pointContextMenu.ref} />}
         </>
     );
 }
